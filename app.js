@@ -138,19 +138,25 @@ app.get("/ruta-prueba",[auth.ensureAuth, auth.hasRole(['administrador'])], (req,
 
 
 app.use((err, req, res,next) => {
+    const statusCode = Number.isInteger(err?.statusCode) ? err.statusCode : 500;
+    const isOperational = err instanceof AppError || err?.isOperational === true;
+    const message = err?.message || messages.error.INTERNAL_SERVER_ERROR.message;
+
     if (err instanceof AppError) {
-        logger.warn(`${err.statusCode} - ${err.message} - [Key: ${err.key}] - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-        return res.status(err.statusCode).json({
-            status: 'fail',
-            message: err.message
-        });  
+        logger.warn(`${statusCode} - ${message} - [Key: ${err.key}] - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+    } else if (isOperational) {
+        logger.warn(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+    } else {
+        logger.error(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method} - ${req.ip} - Stack: ${err?.stack}`);
     }
-    logger.error(`${err.statusCode || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip} - Stack: ${err.stack}`);
-    const responseMessage = process.env.NODE_ENV === 'production'
-        ? messages.error.INTERNAL_SERVER_ERROR.message
-        : err.message;
-    return res.status(500).json({
-        status: 'error',
+
+    const responseMessage =
+        process.env.NODE_ENV === 'production' && statusCode >= 500 && !isOperational
+            ? messages.error.INTERNAL_SERVER_ERROR.message
+            : message;
+
+    return res.status(statusCode).json({
+        status: statusCode >= 500 ? 'error' : 'fail',
         message: responseMessage
     });  
 });

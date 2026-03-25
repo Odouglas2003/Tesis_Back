@@ -7,6 +7,7 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "start:prod": "NODE_ENV=production node index.js",
+    "seed:demo": "node scripts/seedDemoData.js",
     "build": "npm run lint && npm run build-docs",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",

@@ -41,16 +41,36 @@ class ConfigurationService {
       throw error;
     }
 
-    // Validación más profunda de cada objeto columna (ejemplo)
-    for (const col of newColumns) {
-      if (typeof col !== 'object' || col === null || !col.key || typeof col.key !== 'string' || !col.label || typeof col.label !== 'string' || typeof col.visible !== 'boolean') {
-        const error = new Error('Cada columna en el array debe ser un objeto con propiedades "key" (string), "label" (string) y "visible" (boolean).');
+    const normalizedColumns = newColumns.map((col, index) => {
+      if (
+        typeof col !== 'object' ||
+        col === null ||
+        !col.field ||
+        typeof col.field !== 'string' ||
+        !col.displayName ||
+        typeof col.displayName !== 'string'
+      ) {
+        const error = new Error('Cada columna en el array debe ser un objeto con propiedades "field" (string) y "displayName" (string).');
         error.statusCode = 400;
         error.isOperational = true;
         error.invalidColumnData = col; // Opcional: para loguear qué columna falló
         throw error;
       }
-    }
+
+      if (col.order !== undefined && typeof col.order !== 'number') {
+        const error = new Error('La propiedad "order" debe ser numérica cuando está presente.');
+        error.statusCode = 400;
+        error.isOperational = true;
+        error.invalidColumnData = col;
+        throw error;
+      }
+
+      return {
+        displayName: String(col.displayName).trim(),
+        field: String(col.field).trim(),
+        order: typeof col.order === 'number' ? col.order : index,
+      };
+    });
 
     const sectionTrimmed = String(section).trim();
     // logger.debug(`Servicio: Actualizando/creando configuración para sección: '${sectionTrimmed}' con ${newColumns.length} columnas.`);
@@ -58,7 +78,7 @@ class ConfigurationService {
     try {
         const updatedConfig = await TableConfig.findOneAndUpdate(
           { section: sectionTrimmed },
-          { $set: { columns: newColumns } }, // $set reemplazará el array 'columns' completo
+          { $set: { columns: normalizedColumns } }, // $set reemplazará el array 'columns' completo
           { new: true, upsert: true, runValidators: true }
         );
 
