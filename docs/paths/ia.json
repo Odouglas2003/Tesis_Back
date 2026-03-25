@@ -1,0 +1,41 @@
+{
+  "/ia/recommend-team": {
+    "post": {
+      "tags": [ "IA" ],
+      "summary": "Obtener recomendación de equipo",
+      "description": "Envía los detalles de un proyecto y las posiciones requeridas a un servicio externo de IA para recibir una propuesta de equipo. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": { 
+        "required": true, 
+        "description": "Detalles del proyecto y los roles necesarios.",
+        "content": { "application/json": { "schema": { "$ref": "../components/schemas/ia.json#/RecommendTeamPayload" } } } 
+      },
+      "responses": {
+        "200": { "description": "Recomendación generada exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/ia.json#/RecommendTeamSuccessResponse" } } } },
+        "400": { "description": "La solicitud es inválida (faltan campos requeridos)." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "503": { "description": "El servicio de IA no está configurado o no está disponible." },
+        "504": { "description": "El servicio de IA tardó demasiado en responder (Gateway Timeout)." }
+      }
+    }
+  },
+  "/ia/chat": {
+    "post": {
+      "tags": [ "IA" ],
+      "summary": "Interactuar con el chatbot Rubiko",
+      "description": "Envía un mensaje de texto al servicio de IA y recibe una respuesta conversacional.",
+      "requestBody": {
+        "required": true,
+        "description": "Mensaje del usuario para la IA.",
+        "content": { "application/json": { "schema": { "$ref": "../components/schemas/ia.json#/ChatPayload" } } }
+      },
+      "responses": {
+        "200": { "description": "Respuesta de la IA recibida exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/ia.json#/ChatResponse" } } } },
+        "400": { "description": "Falta el campo 'message' en la solicitud." },
+        "500": { "description": "Error de configuración del servidor (URL de la IA no definida)." },
+        "503": { "description": "No se pudo conectar con el servicio de IA." }
+      }
+    }
+  }
+}

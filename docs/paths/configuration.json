@@ -1,0 +1,37 @@
+{
+  "/configuration/columns/{section}": {
+    "get": {
+      "tags": [ "Configuration" ],
+      "summary": "Obtener configuración de columnas para una tabla",
+      "description": "Devuelve la configuración de columnas (visibilidad, orden, etc.) para una sección específica de la aplicación (ej. 'users', 'projects').",
+      "parameters": [
+        { 
+          "name": "section", 
+          "in": "path", 
+          "required": true, 
+          "description": "El identificador de la sección de la tabla.", 
+          "schema": { "type": "string", "example": "users" } 
+        }
+      ],
+      "responses": {
+        "200": { "description": "Configuración obtenida exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/configuration.json#/TableConfigurationResponse" } } } },
+        "404": { "description": "No se encontró configuración para la sección especificada." }
+      }
+    }
+  },
+  "/configuration/updateColumns": {
+    "put": {
+      "tags": [ "Configuration" ],
+      "summary": "Actualizar configuración de columnas",
+      "description": "Crea o actualiza la configuración de columnas para una sección de tabla. Reemplaza la configuración existente con la nueva proporcionada.",
+      "requestBody": { 
+        "required": true, 
+        "content": { "application/json": { "schema": { "$ref": "../components/schemas/configuration.json#/UpdateTableColumnsPayload" } } } 
+      },
+      "responses": {
+        "200": { "description": "Configuración actualizada exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/configuration.json#/UpdateTableColumnsSuccessResponse" } } } },
+        "400": { "description": "Datos de entrada inválidos (falta 'tableType', 'columns' no es un array, o las columnas tienen un formato incorrecto)." }
+      }
+    }
+  }
+}

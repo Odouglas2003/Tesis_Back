@@ -1,0 +1,91 @@
+{
+  "MetricasClave": {
+    "type": "object",
+    "description": "KPIs principales del estado de la empresa.",
+    "properties": {
+      "totalColaboradores": { "type": "integer", "example": 75 },
+      "proyectosActivos": { "type": "integer", "example": 12 },
+      "vacantesActivas": { "type": "integer", "example": 5 },
+      "totalTecnologias": { "type": "integer", "example": 40 }
+    }
+  },
+  "ContratacionesMensualesData": {
+    "type": "object",
+    "properties": {
+      "mes": { "type": "string", "example": "2024-05" },
+      "nuevasContrataciones": { "type": "integer", "example": 3 }
+    }
+  },
+  "ContratacionesMensuales": {
+    "type": "object",
+    "description": "Datos para el gráfico de contrataciones en los últimos 12 meses.",
+    "properties": {
+      "titulo": { "type": "string", "example": "Contrataciones por Mes (Últimos 12 meses)" },
+      "datos": { "type": "array", "items": { "$ref": "#/ContratacionesMensualesData" } }
+    }
+  },
+  "EstadoDeProyectos": {
+    "type": "object",
+    "description": "Distribución de proyectos por estado (Ejecución vs. Terminado).",
+    "properties": {
+      "total": { "type": "integer", "example": 15 },
+      "porEstado": {
+        "type": "object",
+        "properties": {
+          "Ejecución": { "type": "integer", "example": 12 },
+          "Terminado": { "type": "integer", "example": 3 }
+        }
+      }
+    }
+  },
+  "EstadoDeAsignacion": {
+    "type": "object",
+    "description": "Distribución de colaboradores activos según su carga de trabajo (cantidad de proyectos).",
+    "properties": {
+      "total": { "type": "integer", "example": 75 },
+      "porEstado": {
+        "type": "object",
+        "properties": {
+          "Sobrecargado": { "type": "integer", "example": 5 },
+          "Al límite": { "type": "integer", "example": 15 },
+          "Normal": { "type": "integer", "example": 45 },
+          "Sin asignación": { "type": "integer", "example": 10 }
+        }
+      }
+    }
+  },
+  "TecnologiaTop": {
+    "type": "object",
+    "properties": {
+      "nombre": { "type": "string", "example": "Node.js" },
+      "cantidad": { "type": "integer", "example": 25 }
+    }
+  },
+  "PersonasPorProyecto": {
+    "type": "object",
+    "properties": {
+      "nombre": { "type": "string", "example": "Proyecto Alpha" },
+      "cantidad": { "type": "integer", "example": 8 }
+    }
+  },
+  "DashboardMetricsResponse": {
+    "type": "object",
+    "description": "Respuesta completa con todas las métricas para el dashboard.",
+    "properties": {
+      "metricasClave": { "$ref": "#/MetricasClave" },
+      "contratacionesMensuales": { "$ref": "#/ContratacionesMensuales" },
+      "estadoDeProyectos": { "$ref": "#/EstadoDeProyectos" },
+      "estadoDeAsignacion": { "$ref": "#/EstadoDeAsignacion" },
+      "tecnologiasTop": { 
+        "type": "array", 
+        "description": "Lista de las tecnologías más utilizadas por los colaboradores activos.",
+        "items": { "$ref": "#/TecnologiaTop" } 
+      },
+      "personasPorProyecto": { 
+        "type": "array", 
+        "description": "Lista de proyectos activos con la mayor cantidad de personas asignadas.",
+        "items": { "$ref": "#/PersonasPorProyecto" } 
+      }
+    }
+  }
+}

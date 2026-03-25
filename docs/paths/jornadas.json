@@ -1,0 +1,63 @@
+{
+  "/jornadas/": {
+    "get": {
+      "tags": [ "Jornada" ],
+      "summary": "Obtener todas las jornadas laborales",
+      "description": "Devuelve una lista de todas las definiciones de jornadas laborales disponibles.",
+      "responses": {
+        "200": { "description": "Lista de jornadas obtenida.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/jornada.json#/JornadaListResponse" } } } }
+      }
+    },
+    "post": {
+      "tags": [ "Jornada" ],
+      "summary": "Crear una nueva jornada",
+      "description": "Crea una nueva definición de jornada. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/jornada.json#/CreateJornadaPayload" } } } },
+      "responses": {
+        "201": { "description": "Jornada creada exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/jornada.json#/JornadaSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "409": { "description": "Conflicto, ya existe una jornada con ese nombre." }
+      }
+    }
+  },
+  "/jornadas/{id}": {
+    "get": {
+      "tags": [ "Jornada" ],
+      "summary": "Obtener una jornada por ID",
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la jornada.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Detalles de la jornada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/jornada.json#/JornadaBase" } } } },
+        "404": { "description": "Jornada no encontrada." }
+      }
+    },
+    "put": {
+      "tags": [ "Jornada" ],
+      "summary": "Actualizar una jornada",
+      "description": "Actualiza los datos de una jornada existente. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la jornada.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/jornada.json#/UpdateJornadaPayload" } } } },
+      "responses": {
+        "200": { "description": "Jornada actualizada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/jornada.json#/JornadaSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Jornada no encontrada." }
+      }
+    },
+    "delete": {
+      "tags": [ "Jornada" ],
+      "summary": "Eliminar una jornada",
+      "description": "Elimina permanentemente una jornada. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la jornada.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Jornada eliminada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/jornada.json#/DeleteJornadaSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Jornada no encontrada." }
+      }
+    }
+  }
+}

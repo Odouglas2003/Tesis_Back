@@ -1,0 +1,25 @@
+{
+  "StateProjectBase": {
+    "type": "object",
+    "description": "Representa un estado posible para un proyecto.",
+    "properties": {
+      "id": { 
+        "type": "string", 
+        "description": "ID único definido para el estado (no el _id de mongo).",
+        "example": "IN_PROGRESS"
+      },
+      "status": { 
+        "type": "string", 
+        "description": "Nombre o descripción del estado.",
+        "example": "En Progreso" 
+      }
+    }
+  },
+
+  "StateProjectListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/StateProjectBase"
+    }
+  }
+}

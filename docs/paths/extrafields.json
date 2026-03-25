@@ -1,0 +1,51 @@
+{
+  "/extra-fields/": {
+    "get": {
+      "tags": [ "ExtraFields" ],
+      "summary": "Obtener todas las definiciones de campos extra",
+      "description": "Devuelve una lista de todas las definiciones de campos extra personalizables, ordenadas por el campo 'order'.",
+      "responses": {
+        "200": { 
+          "description": "Lista de definiciones de campos extra obtenida exitosamente.", 
+          "content": { "application/json": { "schema": { "$ref": "../components/schemas/extrafield.json#/ExtraFieldDefListResponse" } } } 
+        }
+      }
+    },
+    "post": {
+      "tags": [ "ExtraFields" ],
+      "summary": "Crear una nueva definición de campo extra",
+      "description": "Crea una nueva definición de campo extra. La 'key' debe ser única.",
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/extrafield.json#/CreateExtraFieldPayload" } } } },
+      "responses": {
+        "201": { 
+          "description": "Definición de campo extra creada exitosamente.", 
+          "content": { "application/json": { "schema": { "$ref": "../components/schemas/extrafield.json#/ExtraFieldDefBase" } } } 
+        },
+        "400": { "description": "Error de validación o la 'key' ya existe." }
+      }
+    }
+  },
+  "/extra-fields/{id}": {
+    "put": {
+      "tags": [ "ExtraFields" ],
+      "summary": "Actualizar una definición de campo extra",
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la definición del campo.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/extrafield.json#/UpdateExtraFieldPayload" } } } },
+      "responses": {
+        "200": { "description": "Definición de campo actualizada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/extrafield.json#/ExtraFieldDefBase" } } } },
+        "404": { "description": "Definición de campo no encontrada." }
+      }
+    },
+    "delete": {
+      "tags": [ "ExtraFields" ],
+      "summary": "Eliminar una definición de campo extra",
+      "description": "Elimina una definición de campo extra solo si no está siendo utilizada por ningún registro de 'Personnel'.",
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la definición del campo.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Definición eliminada exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/extrafield.json#/DeleteSuccessResponse" } } } },
+        "404": { "description": "Definición de campo no encontrada." },
+        "409": { "description": "Conflicto. El campo está en uso y no se puede eliminar.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/extrafield.json#/ConflictResponse" } } } }
+      }
+    }
+  }
+}

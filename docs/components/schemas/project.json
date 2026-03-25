@@ -1,0 +1,190 @@
+{
+  "AssignedPerson": {
+    "type": "object",
+    "description": "Representa una persona asignada a un proyecto.",
+    "properties": {
+      "name": { "type": "string", "example": "Ana García" },
+      "id": { "type": "string", "description": "DNI/ID único de la persona asignada.", "example": "12345678A" },
+      "rol": { "type": "string", "example": "Backend Developer" },
+      "horasAsignadas": { "type": "number", "example": 40 },
+      "tecnologias": { "type": "array", "items": { "type": "string" }, "example": ["Node.js", "Express"] },
+      "seniority": { "type": "string", "example": "Senior" },
+      "orderDate": { "type": "string", "format": "date-time" },
+      "startDate": { "type": "string", "format": "date-time" }
+    }
+  },
+
+  "ProjectContractStatus": {
+    "type": "object",
+    "description": "Estado dinámico del contrato del proyecto, calculado en tiempo real.",
+    "properties": {
+      "daysRemaining": { "type": "integer", "nullable": true, "example": 25 },
+      "alertLevel": { "type": "string", "nullable": true, "enum": ["expired", "due_today", "warning", "on_time"], "example": "warning" },
+      "message": { "type": "string", "nullable": true, "example": "Proyecto vence en 25 día(s)" }
+    }
+  },
+
+   "ProjectBase": {
+    "type": "object",
+    "description": "Representación completa de un proyecto.",
+    "properties": {
+      "id": { "type": "string", "format": "ObjectId", "readOnly": true },
+      "managerId": { "type": "string", "example": "mgr_001" },
+      "managerName": { "type": "string", "example": "Gerente de Proyecto" },
+      "managerVisibleInOrgChart": { "type": "boolean", "default": true },
+      "ia_generated": { "type": "boolean", "default": false, "description": "Indica si el proyecto fue generado por la IA." },
+      "taxonId": { "type": "number", "example": 701 },
+      "name": { "type": "string", "example": "Sistema de Gestión Alpha" },
+      "client": { "type": "string", "example": "Cliente Global" },
+      "status": { "type": "string", "example": "En Progreso" },
+      "phase": { "type": "string", "example": "Desarrollo" },
+      "projectType": { "type": "string", "example": "Desarrollo de Software" },
+      "assignedPersons": { "type": "array", "items": { "$ref": "#/AssignedPerson" } },
+      "startDate": { "type": "string", "format": "date-time" },
+      "endDate": { "type": "string", "format": "date-time" },
+      "image": { "type": "string", "format": "uri" },
+      "description": { "type": "string" },
+      "category": { "type": "string", "enum": ["Gobierno", "Privado", "Inversion"] },
+      "budget": { "type": "number", "minimum": 0 },
+      "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+      "last_edited_by": { "type": "string" },
+      "last_edited_on": { "type": "string", "format": "date-time", "readOnly": true },
+      "contractStatus": { "$ref": "#/ProjectContractStatus" }
+    }
+  },
+
+  "ProjectListResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "count": { "type": "integer" },
+      "data": { "type": "array", "items": { "$ref": "#/ProjectBase" } }
+    }
+  },
+
+  "SingleProjectResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "data": { "$ref": "#/ProjectBase" }
+    }
+  },
+
+    "RegisterProjectPayload": {
+    "type": "object",
+    "allOf": [{ "$ref": "#/ProjectBase" }],
+    "description": "Datos necesarios para registrar un nuevo proyecto. 'id' y campos de solo lectura serán ignorados.",
+    "required": ["managerId", "managerName", "managerVisibleInOrgChart", "name", "client", "status", "projectType", "startDate", "endDate", "category"]
+  },
+
+  "ProjectSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string" },
+      "project": { "$ref": "#/ProjectBase" }
+    }
+  },
+
+   "UpdateProjectPayload": {
+    "type": "object",
+    "description": "Campos actualizables para un proyecto. 'id' y otros campos de solo lectura no se pueden modificar.",
+    "properties": {
+      "managerName": { "type": "string" },
+      "name": { "type": "string" },
+      "client": { "type": "string" },
+      "status": { "type": "string" },
+      "phase": { "type": "string" },
+      "projectType": { "type": "string" },
+      "startDate": { "type": "string", "format": "date-time" },
+      "endDate": { "type": "string", "format": "date-time" },
+      "description": { "type": "string" },
+      "category": { "type": "string", "enum": ["Gobierno", "Privado", "Inversion"] },
+      "budget": { "type": "number", "minimum": 0 }
+    }
+  },
+
+  "DeleteProjectSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Proyecto marcado como eliminado correctamente." },
+      "details": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "ObjectId" },
+          "deleted_at": { "type": "string", "format": "date-time" },
+          "vacancies_deleted_count": { "type": "integer" }
+        }
+      }
+    }
+  },
+  
+  "AddAssignedPersonPayload": {
+      "$ref": "#/AssignedPerson"
+  },
+
+  "RemoveAssignedPersonPayload": {
+    "type": "object",
+    "properties": {
+        "id": { "type": "string", "description": "El DNI/ID de la persona a remover del proyecto.", "example": "12345678A" }
+    },
+    "required": ["id"]
+  },
+
+  "UpdateAssignedPersonPayload": {
+      "type": "object",
+      "description": "El ID de la persona a editar (en la URL) y los campos a modificar.",
+      "properties": {
+        "name": { "type": "string" },
+        "rol": { "type": "string" },
+        "horasAsignadas": { "type": "number" },
+        "tecnologias": { "type": "array", "items": { "type": "string" } },
+        "seniority": { "type": "string" }
+      }
+  },
+    "RegisterWithRelationsPayload": {
+    "type": "object",
+    "description": "Payload complejo para registrar un proyecto y actualizar/crear sus relaciones con colaboradores y vacantes en una sola transacción.",
+    "properties": {
+      "project": { "$ref": "#/RegisterProjectPayload" },
+      "collaborators": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string", "format": "ObjectId", "description": "ID del colaborador a actualizar." },
+            "projectHours": { "type": "number", "description": "Horas a asignar a este nuevo proyecto." },
+            "assignToProject": { "type": "boolean", "description": "Si es true, se añade este proyecto a la lista del colaborador." },
+            "rol": { "type": "string" },
+            "seniority": { "type": "string" }
+          }
+        }
+      },
+      "vacancies": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "vacancieName": { "type": "string" },
+            "hours": { "type": "number" },
+            "seniority": { "type": "string" },
+            "skills": { "type": "array", "items": { "type": "object", "properties": {"name": {"type": "string"}} } }
+          }
+        }
+      }
+    },
+    "required": ["project"]
+  },
+
+   
+
+  "RegisterWithRelationsResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Proyecto registrado y relaciones procesadas" },
+      "data": { "type": "object", "additionalProperties": true }
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "UserStatusEnum": {
+    "type": "string",
+    "description": "Estado de la cuenta del usuario.",
+    "enum": ["pending", "active", "rejected"]
+  },
+
+  "UserBase": {
+    "type": "object",
+    "description": "Información base de un usuario, sin incluir datos sensibles como la contraseña.",
+    "properties": {
+      "_id": {
+        "type": "string",
+        "format": "ObjectId",
+        "readOnly": true,
+        "description": "ID único del usuario en MongoDB."
+      },
+      "name": {
+        "type": "string",
+        "example": "Juan Pérez"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "example": "juan.perez@example.com"
+      },
+      "rol": {
+        "type": "string",
+        "description": "Rol del usuario en el sistema.",
+        "example": "moderator"
+      },
+      "status": {
+        "$ref": "#/UserStatusEnum"
+      },
+      "iamge": {
+        "type": "string",
+        "format": "uri",
+        "nullable": true,
+        "description": "URL de la imagen de perfil del usuario."
+      }
+    }
+  },
+
+  "UserListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/UserBase"
+    }
+  },
+
+  "RegisterPayload": {
+    "type": "object",
+    "description": "Datos necesarios para registrar un nuevo usuario.",
+    "properties": {
+      "name": { "type": "string", "example": "Nuevo Usuario" },
+      "email": { "type": "string", "format": "email", "example": "nuevo@example.com" },
+      "password": { "type": "string", "format": "password", "example": "password123" },
+      "rol": { "type": "string", "example": "user" }
+    },
+    "required": ["name", "email", "password", "rol"]
+  },
+
+  "RegisterSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Solicitud de registro enviada. Pendiente de autorización." },
+      "user": { "$ref": "#/UserBase" }
+    }
+  },
+
+  "LoginPayload": {
+    "type": "object",
+    "description": "Credenciales para iniciar sesión.",
+    "properties": {
+      "email": { "type": "string", "format": "email", "example": "juan.perez@example.com" },
+      "password": { "type": "string", "format": "password", "example": "password123" }
+    },
+    "required": ["email", "password"]
+  },
+
+  "LoginSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Usuario logueado correctamente." },
+      "user": { "$ref": "#/UserBase" },
+      "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+    }
+  },
+  
+  "UpdateUserPayload": {
+    "type": "object",
+    "description": "Campos actualizables para un usuario. Todos son opcionales.",
+    "properties": {
+      "name": { "type": "string" },
+      "rol": { "type": "string" },
+      "status": { "$ref": "#/UserStatusEnum" }
+    }
+  },
+
+  "UpdateUserSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Usuario actualizado correctamente." },
+      "user": { "$ref": "#/UserBase" }
+    }
+  },
+
+  "RequestPasswordResetPayload": {
+    "type": "object",
+    "properties": {
+      "email": { "type": "string", "format": "email", "example": "usuario.olvidadizo@example.com" }
+    },
+    "required": ["email"]
+  },
+
+  "ResetPasswordPayload": {
+    "type": "object",
+    "properties": {
+      "email": { "type": "string", "format": "email" },
+      "newPassword": { "type": "string", "format": "password" },
+      "confirmPassword": { "type": "string", "format": "password" }
+    },
+    "required": ["email", "newPassword", "confirmPassword"]
+  },
+  
+  "SimpleSuccessResponse": {
+    "type": "object",
+    "properties": {
+        "status": { "type": "string", "example": "success" },
+        "message": { "type": "string" }
+    }
+  },
+
+  "SimpleMessageResponse": {
+      "type": "object",
+      "properties": {
+          "message": { "type": "string" }
+      }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "ColumnConfig": {
+    "type": "object",
+    "description": "Define la configuración de una columna individual en una tabla.",
+    "properties": {
+      "displayName": { 
+        "type": "string", 
+        "description": "El nombre a mostrar para la columna en la UI.",
+        "example": "Nombre de Usuario" 
+      },
+      "field": { 
+        "type": "string", 
+        "description": "La clave del campo en el objeto de datos que corresponde a esta columna.",
+        "example": "name" 
+      },
+      "order": { 
+        "type": "number", 
+        "description": "Un número para determinar el orden de la columna (opcional).",
+        "example": 1 
+      }
+    }
+  },
+
+  "TableConfigurationResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "section": { 
+        "type": "string", 
+        "description": "El identificador de la sección de la tabla.",
+        "example": "users" 
+      },
+      "columns": { 
+        "type": "array", 
+        "items": { "$ref": "#/ColumnConfig" } 
+      },
+      "message": { "type": "string" }
+    }
+  },
+
+  "UpdateTableColumnsPayload": {
+    "type": "object",
+    "description": "Datos necesarios para actualizar la configuración de columnas de una tabla.",
+    "properties": {
+      "tableType": { 
+        "type": "string", 
+        "description": "El identificador de la sección/tabla a configurar (ej. 'users', 'projects').",
+        "example": "users" 
+      },
+      "columns": { 
+        "type": "array", 
+        "items": { "$ref": "#/ColumnConfig" } 
+      }
+    },
+    "required": ["tableType", "columns"]
+  },
+
+  "UpdateTableColumnsSuccessResponse": {
+    "$ref": "#/TableConfigurationResponse"
+  }
+}

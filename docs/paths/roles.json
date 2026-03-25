@@ -1,0 +1,57 @@
+{
+  "/roles/": {
+    "get": {
+      "tags": [ "Roles" ],
+      "summary": "Obtener todos los roles",
+      "description": "Devuelve una lista de todos los roles definidos en el sistema.",
+      "responses": {
+        "200": { "description": "Lista de roles obtenida.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/role.json#/RoleListResponse" } } } }
+      }
+    },
+    "post": {
+      "tags": [ "Roles" ],
+      "summary": "Crear un nuevo rol",
+      "description": "Crea un nuevo rol. El nombre del rol debe ser único. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/role.json#/CreateRolePayload" } } } },
+      "responses": {
+        "201": { "description": "Rol creado exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/role.json#/CreateRoleSuccessResponse" } } } },
+        "400": { "description": "Faltan campos requeridos (nombre o descripción)." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "409": { "description": "Ya existe un rol con ese nombre (Conflicto)." }
+      }
+    }
+  },
+  "/roles/{id}": {
+    "put": {
+      "tags": [ "Roles" ],
+      "summary": "Actualizar un rol",
+      "description": "Actualiza los datos de un rol existente. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB del rol.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/role.json#/UpdateRolePayload" } } } },
+      "responses": {
+        "200": { "description": "Rol actualizado.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/role.json#/UpdateRoleSuccessResponse" } } } },
+        "400": { "description": "No se proporcionaron datos para actualizar." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Rol no encontrado." },
+        "409": { "description": "El nuevo nombre del rol ya existe." }
+      }
+    },
+    "delete": {
+      "tags": [ "Roles" ],
+      "summary": "Eliminar un rol",
+      "description": "Elimina permanentemente un rol. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB del rol.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Rol eliminado.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/role.json#/DeleteRoleSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Rol no encontrado." }
+      }
+    }
+  }
+}

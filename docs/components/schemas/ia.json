@@ -1,0 +1,101 @@
+{
+  "RequestDetails": {
+    "type": "object",
+    "description": "Detalles generales de la solicitud de recomendación.",
+    "properties": {
+      "start_date": { "type": "string", "format": "date", "example": "2024-12-01" },
+      "end_date": { "type": "string", "format": "date", "example": "2025-06-01" },
+      "budget": { "type": "number", "example": 50000 },
+      "objective": { "type": "string", "example": "Desarrollar un nuevo módulo de e-commerce para la plataforma." }
+    },
+    "required": ["start_date"]
+  },
+
+  "PositionRequested": {
+    "type": "object",
+    "description": "Describe una posición o rol requerido para el equipo.",
+    "properties": {
+      "position_name": { "type": "string", "example": "Backend Developer" },
+      "required_skills": { 
+        "type": "array", 
+        "items": { "type": "string" }, 
+        "example": ["Node.js", "Express", "MongoDB", "REST APIs"] 
+      },
+      "seniority": { "type": "string", "example": "Senior" },
+      "hours_per_week": { "type": "number", "example": 40 }
+    }
+  },
+
+  "RecommendTeamPayload": {
+    "type": "object",
+    "description": "Cuerpo de la solicitud para obtener una recomendación de equipo de la IA.",
+    "properties": {
+      "request_details": { "$ref": "#/RequestDetails" },
+      "positions_requested": { "type": "array", "items": { "$ref": "#/PositionRequested" } }
+    },
+    "required": ["request_details", "positions_requested"]
+  },
+  
+  "TeamRecommendationData": {
+    "type": "object",
+    "description": "Respuesta del servicio de IA. La estructura puede variar, este es un ejemplo.",
+    "additionalProperties": true,
+    "example": {
+      "proposed_team": [
+        {
+          "position": "Backend Developer",
+          "recommended_collaborator": {
+            "id": "60d21b4667d0d8992e610c85",
+            "name": "Ana García",
+            "match_score": 0.95,
+            "justification": "Excelente compatibilidad de skills y seniority. Disponibilidad completa."
+          }
+        },
+        {
+          "position": "Frontend Developer",
+          "recommended_collaborator": {
+            "id": "60d21b4667d0d8992e610c86",
+            "name": "Carlos Sánchez",
+            "match_score": 0.89,
+            "justification": "Fuerte en React y disponible para las fechas solicitadas."
+          }
+        }
+      ],
+      "estimated_cost": 48500,
+      "risk_analysis": "Bajo. El equipo propuesto tiene experiencia probada en proyectos similares."
+    }
+  },
+
+  "RecommendTeamSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Recomendación de equipo generada exitosamente." },
+      "data": { "$ref": "#/TeamRecommendationData" }
+    }
+  },
+    "ChatPayload": {
+    "type": "object",
+    "description": "Mensaje enviado al chatbot de la IA.",
+    "properties": {
+      "message": {
+        "type": "string",
+        "description": "La pregunta o consulta del usuario.",
+        "example": "¿Cuáles son los 3 colaboradores con más experiencia en React?"
+      }
+    },
+    "required": ["message"]
+  },
+
+  "ChatResponse": {
+    "type": "object",
+    "description": "Respuesta generada por el chatbot de la IA.",
+    "properties": {
+      "answer": {
+        "type": "string",
+        "description": "La respuesta textual de la IA a la consulta.",
+        "example": "Los 3 colaboradores con más experiencia en React son: Ana García, Carlos Sánchez y Elena Silva."
+      }
+    }
+  }
+}

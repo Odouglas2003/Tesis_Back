@@ -1,0 +1,57 @@
+{
+  "JornadaBase": {
+    "type": "object",
+    "description": "Representa una definición de jornada laboral.",
+    "properties": {
+      "id": { "type": "string", "format": "ObjectId", "readOnly": true },
+      "name": { "type": "string", "description": "Nombre único de la jornada.", "example": "Jornada Completa" },
+      "hours": { "type": "number", "description": "Número de horas semanales.", "example": 40 },
+      "description": { "type": "string", "description": "Descripción opcional.", "example": "Jornada estándar de 8 horas diarias." },
+      "createdAt": { "type": "string", "format": "date-time", "readOnly": true },
+      "updatedAt": { "type": "string", "format": "date-time", "readOnly": true }
+    }
+  },
+
+  "JornadaListResponse": {
+    "type": "array",
+    "items": { "$ref": "#/JornadaBase" }
+  },
+
+  "CreateJornadaPayload": {
+    "type": "object",
+    "description": "Datos para crear una nueva jornada.",
+    "properties": {
+      "name": { "type": "string", "example": "Media Jornada (Mañana)" },
+      "hours": { "type": "number", "example": 20 },
+      "description": { "type": "string", "example": "De 9:00 a 13:00." }
+    },
+    "required": ["name", "hours"]
+  },
+
+  "JornadaSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "jornada": { "$ref": "#/JornadaBase" }
+    }
+  },
+
+  "UpdateJornadaPayload": {
+    "type": "object",
+    "description": "Campos actualizables para una jornada. Todos son opcionales.",
+    "properties": {
+      "name": { "type": "string" },
+      "hours": { "type": "number" },
+      "description": { "type": "string" }
+    }
+  },
+
+  "DeleteJornadaSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Jornada eliminada correctamente" },
+      "id": { "type": "string", "format": "ObjectId" }
+    }
+  }
+}

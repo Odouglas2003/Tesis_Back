@@ -1,0 +1,132 @@
+{
+  "/projects/": {
+    "get": {
+      "tags": [ "Projects" ],
+      "summary": "Obtener lista de proyectos",
+      "description": "Devuelve una lista de todos los proyectos activos, enriquecidos con el estado de su contrato.",
+      "parameters": [
+        { "name": "search", "in": "query", "description": "Término para buscar por nombre.", "schema": { "type": "string" } }
+      ],
+      "responses": {
+        "200": { "description": "Lista de proyectos obtenida.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/ProjectListResponse" } } } }
+      }
+    }
+  },
+  "/projects/register": {
+    "post": {
+      "tags": [ "Projects" ],
+      "summary": "Registrar un nuevo proyecto (simple)",
+      "description": "Crea un nuevo proyecto. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/RegisterProjectPayload" } } } },
+      "responses": {
+        "201": { "description": "Proyecto registrado.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/ProjectSuccessResponse" } } } },
+        "400": { "description": "Datos inválidos o nombre ya existe." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." }
+      }
+    }
+  },
+  "/projects/register-relations": {
+    "post": {
+      "tags": [ "Projects" ],
+      "summary": "Registrar proyecto con relaciones",
+      "description": "Crea un nuevo proyecto y simultáneamente actualiza colaboradores y crea vacantes asociadas. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/RegisterWithRelationsPayload" } } } },
+      "responses": {
+        "201": { "description": "Proyecto y relaciones procesadas.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/RegisterWithRelationsResponse" } } } },
+        "400": { "description": "Datos de entrada inválidos." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." }
+      }
+    }
+  },
+  "/projects/{id}": {
+    "get": {
+      "tags": [ "Projects" ],
+      "summary": "Obtener un proyecto por ID",
+      "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Detalles del proyecto.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/SingleProjectResponse" } } } },
+        "404": { "description": "Proyecto no encontrado." }
+      }
+    },
+    "put": {
+      "tags": [ "Projects" ],
+      "summary": "Actualizar un proyecto",
+      "description": "Actualiza un proyecto. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/UpdateProjectPayload" } } } },
+      "responses": {
+        "200": { "description": "Proyecto actualizado.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/ProjectSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Proyecto no encontrado." }
+      }
+    },
+    "post": {
+      "tags": [ "Projects" ],
+      "summary": "Eliminar un proyecto (Soft Delete)",
+      "description": "Marca un proyecto como eliminado. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Proyecto eliminado.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/DeleteProjectSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Proyecto no encontrado." }
+      }
+    }
+  },
+  "/projects/{id}/assigned-persons": {
+    "post": {
+      "tags": [ "Projects" ],
+      "summary": "Añadir persona a un proyecto",
+      "description": "Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/AddAssignedPersonPayload" } } } },
+      "responses": {
+        "200": { "description": "Persona asignada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/ProjectSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Proyecto no encontrado." }
+      }
+    },
+    "delete": {
+      "tags": [ "Projects" ],
+      "summary": "Remover persona de un proyecto",
+      "description": "Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/RemoveAssignedPersonPayload" } } } },
+      "responses": {
+        "200": { "description": "Persona removida.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/ProjectSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Proyecto no encontrado." }
+      }
+    }
+  },
+  "/projects/{id}/assignedPersons/{personId}": {
+    "put": {
+      "tags": [ "Projects" ],
+      "summary": "Editar persona asignada a un proyecto",
+      "description": "Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } },
+        { "name": "personId", "in": "path", "required": true, "schema": { "type": "string" } }
+      ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/UpdateAssignedPersonPayload" } } } },
+      "responses": {
+        "200": { "description": "Persona actualizada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/project.json#/ProjectSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Proyecto o persona no encontrada." }
+      }
+    }
+  }
+}

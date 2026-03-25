@@ -1,0 +1,70 @@
+{
+  "/vacancie/": {
+    "get": {
+      "tags": [ "Vacancies" ],
+      "summary": "Obtener lista de vacantes con filtros",
+      "description": "Devuelve una lista de vacantes. Por defecto, excluye las 'Finalizadas'. Permite filtrar por nombre de proyecto, seniority, estado y un término de búsqueda general.",
+      "parameters": [
+        { "name": "search", "in": "query", "description": "Búsqueda general por nombre de vacante.", "schema": { "type": "string" } },
+        { "name": "projectName", "in": "query", "description": "Filtrar por nombre del proyecto asociado.", "schema": { "type": "string" } },
+        { "name": "seniority", "in": "query", "description": "Filtrar por seniority.", "schema": { "type": "string" } },
+        { "name": "status", "in": "query", "description": "Filtrar por estado exacto (ej. 'Abierta', 'Finalizada').", "schema": { "type": "string", "enum": ["Abierta", "En Proceso", "Finalizada"] } }
+      ],
+      "responses": {
+        "200": { "description": "Lista de vacantes obtenida.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/vacancy.json#/VacancyListResponse" } } } }
+      }
+    },
+    "post": {
+      "tags": [ "Vacancies" ],
+      "summary": "Registrar una nueva vacante",
+      "description": "Crea una nueva vacante. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/vacancy.json#/RegisterVacancyPayload" } } } },
+      "responses": {
+        "201": { "description": "Vacante registrada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/vacancy.json#/RegisterVacancySuccessResponse" } } } },
+        "400": { "description": "Datos inválidos o skills no existentes." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "El proyecto asociado no existe." }
+      }
+    }
+  },
+  "/vacancie/{id}": {
+    "get": {
+      "tags": [ "Vacancies" ],
+      "summary": "Obtener una vacante por ID",
+      "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Detalles de la vacante.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/vacancy.json#/SingleVacancyResponse" } } } },
+        "404": { "description": "Vacante no encontrada." }
+      }
+    },
+    "put": {
+      "tags": [ "Vacancies" ],
+      "summary": "Actualizar una vacante",
+      "description": "Actualiza una vacante. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/vacancy.json#/UpdateVacancyPayload" } } } },
+      "responses": {
+        "200": { "description": "Vacante actualizada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/vacancy.json#/UpdateVacancySuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Vacante o proyecto asociado no encontrado." }
+      }
+    },
+    "delete": {
+      "tags": [ "Vacancies" ],
+      "summary": "Eliminar una vacante (Soft Delete)",
+      "description": "Marca una vacante como eliminada. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Vacante marcada como eliminada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/vacancy.json#/DeleteVacancySuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Vacante no encontrada o ya eliminada." }
+      }
+    }
+  }
+}

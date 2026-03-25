@@ -1,0 +1,78 @@
+{
+  "/notification/notiContracts": {
+    "get": {
+      "tags": [ "Notifications" ],
+      "summary": "Activar revisión de vencimientos de contratos",
+      "description": "Dispara el proceso de servidor que revisa todos los contratos de colaboradores y genera las notificaciones correspondientes si están a 30 días o menos de vencer.",
+      "responses": { "200": { "description": "Proceso iniciado.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/CheckProcessResponse" } } } } }
+    }
+  },
+  "/notification/notiProjects": {
+    "get": {
+      "tags": [ "Notifications" ],
+      "summary": "Activar revisión de vencimientos de proyectos",
+      "description": "Dispara el proceso de servidor que revisa todos los proyectos y genera las notificaciones correspondientes si están a 30 días o menos de su fecha de fin.",
+      "responses": { "200": { "description": "Proceso iniciado.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/CheckProcessResponse" } } } } }
+    }
+  },
+  "/notification/markAsRead": {
+    "post": {
+      "tags": [ "Notifications" ],
+      "summary": "Marcar una notificación como leída",
+      "description": "Un usuario marca una notificación específica (identificada por su tipo y el ID del recurso) como leída.",
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/MarkAsReadPayload" } } } },
+      "responses": {
+        "200": { "description": "Notificación marcada como leída.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/SimpleSuccessMessageResponse" } } } },
+        "400": { "description": "Faltan parámetros en la solicitud." },
+        "404": { "description": "Notificación no encontrada para ese usuario." }
+      }
+    }
+  },
+  "/notification/markAllAsRead": {
+    "post": {
+      "tags": [ "Notifications" ],
+      "summary": "Marcar todas las notificaciones como leídas",
+      "description": "Un usuario marca todas las notificaciones que le han sido enviadas como leídas.",
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/MarkAllAsReadPayload" } } } },
+      "responses": {
+        "200": { "description": "Todas las notificaciones marcadas como leídas.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/SimpleSuccessMessageResponse" } } } },
+        "400": { "description": "Falta el email en la solicitud." }
+      }
+    }
+  },
+  "/notification/byUser/{email}": {
+    "get": {
+      "tags": [ "Notifications" ],
+      "summary": "Obtener notificaciones no leídas por usuario",
+      "description": "Devuelve una lista de todas las notificaciones enviadas a un usuario específico que aún no ha marcado como leídas.",
+      "parameters": [ { "name": "email", "in": "path", "required": true, "description": "Email del usuario.", "schema": { "type": "string", "format": "email" } } ],
+      "responses": { "200": { "description": "Lista de notificaciones no leídas.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/NotificationListForUserResponse" } } } } }
+    }
+  },
+  "/notification/byManager": {
+    "get": {
+      "tags": [ "Notifications" ],
+      "summary": "Obtener estado de lectura de notificaciones para managers",
+      "description": "Devuelve una lista de notificaciones y detalla qué destinatarios (de la lista de emails proporcionada) aún no la han leído.",
+      "parameters": [ { "name": "emails", "in": "query", "required": true, "description": "Lista de emails de managers a consultar, separados por coma.", "schema": { "type": "string", "example": "manager1@example.com,manager2@example.com" } } ],
+      "responses": { "200": { "description": "Estado de lectura de notificaciones.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/NotificationListForManagerResponse" } } } } }
+    }
+  },
+  "/notification/all": {
+    "get": {
+      "tags": [ "Notifications" ],
+      "summary": "Obtener todas las notificaciones (Admin)",
+      "description": "Devuelve todas las notificaciones existentes en la base de datos, sin ningún filtro.",
+      "responses": { "200": { "description": "Lista completa de notificaciones.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/FullNotificationListResponse" } } } } }
+    }
+  },
+  "/notification/ordered": {
+    "get": {
+      "tags": [ "Notifications" ],
+      "summary": "Obtener notificaciones ordenadas",
+      "description": "Devuelve todas las notificaciones ordenadas por fecha de envío, ya sea las más nuevas o las más antiguas primero.",
+      "parameters": [ { "name": "order", "in": "query", "description": "Criterio de ordenación.", "schema": { "type": "string", "enum": ["newest", "oldest"], "default": "newest" } } ],
+      "responses": { "200": { "description": "Lista de notificaciones ordenadas.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/notification.json#/FullNotificationListResponse" } } } } }
+    }
+  }
+}

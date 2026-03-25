@@ -1,0 +1,128 @@
+{
+  "SkillInput": {
+    "type": "object",
+    "description": "Nombre de una habilidad o tecnología requerida.",
+    "properties": {
+      "name": { "type": "string", "example": "React" }
+    }
+  },
+
+  "SkillOutput": {
+    "type": "object",
+    "description": "Habilidad o tecnología poblada con su ID y nombre.",
+    "properties": {
+      "id": { "type": "string", "format": "ObjectId" },
+      "name": { "type": "string", "example": "React" }
+    }
+  },
+  "VacancyBase": {
+    "type": "object",
+    "description": "Representación completa de una vacante.",
+    "properties": {
+      "id": { "type": "string", "format": "ObjectId", "readOnly": true },
+      "manager_id": { "type": "string", "nullable": true, "example": "mgr_001" },
+      "manager_name": { "type": "string", "nullable": true, "example": "Gerente de Contratación" },
+      "manager_visible_in_org_chart": { "type": "boolean", "default": true },
+      "description": { "type": "string", "nullable": true, "example": "Descripción detallada de la vacante." },
+      "status": { "type": "string", "enum": ["Abierta", "En Proceso", "Finalizada"], "default": "Abierta" },
+      "projectId": {
+        "type": "object",
+        "nullable": true,
+        "description": "Datos poblados del proyecto asociado (si existe).",
+        "properties": {
+          "id": { "type": "string", "format": "ObjectId" },
+          "name": { "type": "string", "example": "Sistema de Gestión Alpha" },
+          "client": { "type": "string", "example": "Cliente Global" },
+          "status": { "type": "string", "example": "En Progreso" }
+        }
+      },
+      "vacancieName": { "type": "string", "example": "Desarrollador Full-Stack" },
+      "time": { "type": "number", "description": "Dedicación.", "example": 100 },
+      "orderDate": { "type": "string", "format": "date-time" },
+      "startDate": { "type": "string", "format": "date-time" },
+      "seniority": { "type": "string", "example": "Senior" },
+      "skills": { "type": "array", "items": { "$ref": "#/SkillOutput" } },
+      "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+      "last_edited_by": { "type": "string" },
+      "last_edited_on": { "type": "string", "format": "date-time", "readOnly": true }
+    }
+  },
+
+  "VacancyListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/VacancyBase"
+    }
+  },
+
+  "SingleVacancyResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "data": { "$ref": "#/VacancyBase" }
+    }
+  },
+
+    "RegisterVacancyPayload": {
+    "type": "object",
+    "description": "Datos para registrar una nueva vacante. Las 'skills' se envían como un array de objetos con el nombre de la tecnología.",
+    "properties": {
+      "manager_id": { "type": "string", "nullable": true, "example": "mgr_001" },
+      "manager_name": { "type": "string", "nullable": true, "example": "Gerente de Contratación" },
+      "projectId": { "type": "string", "format": "ObjectId", "nullable": true, "description": "ID del proyecto al que pertenece la vacante." },
+      "vacancieName": { "type": "string", "example": "Analista QA" },
+      "time": { "type": "number", "example": 80 },
+      "orderDate": { "type": "string", "format": "date-time" },
+      "startDate": { "type": "string", "format": "date-time" },
+      "seniority": { "type": "string", "example": "Semi-Senior" },
+      "skills": { "type": "array", "items": { "$ref": "#/SkillInput" }, "example": [{"name": "Cypress"}, {"name": "Jira"}] },
+      "description": { "type": "string" },
+      "status": { "type": "string", "enum": ["Abierta", "En Proceso", "Finalizada"] }
+    },
+    "required": ["vacancieName", "time", "orderDate", "startDate", "seniority"]
+  },
+
+  "RegisterVacancySuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string" },
+      "vacancie": { "$ref": "#/VacancyBase" }
+    }
+  },
+
+  "UpdateVacancyPayload": {
+    "type": "object",
+    "description": "Campos actualizables para una vacante. 'id' y '_id' se ignoran.",
+    "properties": {
+      "manager_id": { "type": "string" },
+      "manager_name": { "type": "string" },
+      "projectId": { "type": "string", "format": "ObjectId" },
+      "vacancieName": { "type": "string" },
+      "time": { "type": "number" },
+      "orderDate": { "type": "string", "format": "date-time" },
+      "startDate": { "type": "string", "format": "date-time" },
+      "seniority": { "type": "string" },
+      "skills": { "type": "array", "items": { "$ref": "#/SkillInput" } }
+    }
+  },
+
+  "UpdateVacancySuccessResponse": {
+      "$ref": "#/RegisterVacancySuccessResponse"
+  },
+  
+  "DeleteVacancySuccessResponse": {
+    "type": "object",
+    "properties": {
+        "status": { "type": "string", "example": "success" },
+        "message": { "type": "string" },
+        "details": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "string", "format": "ObjectId" },
+                "deleted_at": { "type": "string", "format": "date-time" }
+            }
+        }
+    }
+  }
+}

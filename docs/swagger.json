@@ -1,0 +1,5491 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Planilla Rubik API (Versión Actualizada)",
+    "version": "v2.0.0",
+    "description": "Documentación actualizada de la API para el sistema Planilla Rubik. Gestiona proyectos, colaboradores, tecnologías, y más.",
+    "contact": {
+      "name": "Equipo de Desarrollo Planilla Rubik"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3900/api",
+      "description": "Servidor de Desarrollo Local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Endpoints para la autenticación y gestión de usuarios (user.js)."
+    },
+    {
+      "name": "Collaborators",
+      "description": "Gestión de colaboradores (collaborator.js)."
+    },
+    {
+      "name": "Projects",
+      "description": "Gestión de proyectos (projects.js)."
+    },
+    {
+      "name": "Vacancies",
+      "description": "Gestión de vacantes (vacancie.js)."
+    },
+    {
+      "name": "Technologies",
+      "description": "Gestión de tecnologías (technologies.js)."
+    },
+    {
+      "name": "Notifications",
+      "description": "Gestión de notificaciones (notification.js)."
+    },
+    {
+      "name": "Configuration",
+      "description": "Endpoints de configuración del sistema (configuration.js)."
+    },
+    {
+      "name": "Roles",
+      "description": "Gestión de roles de usuario (rolesRoutes.js)."
+    },
+    {
+      "name": "StateProjects",
+      "description": "Gestión de los estados de los proyectos (stateprojects.js)."
+    },
+    {
+      "name": "BasicFields",
+      "description": "Gestión de definiciones de campos básicos (basicFieldRoutes.js)."
+    },
+    {
+      "name": "ExtraFields",
+      "description": "Gestión de campos extra personalizables (extraFieldRoutes.js)."
+    },
+    {
+      "name": "Jornada",
+      "description": "Endpoints para la gestión de jornadas (jornadaRoutes.js)."
+    },
+    {
+      "name": "IA",
+      "description": "Endpoints relacionados con IA (iaRoutes.js)."
+    },
+    {
+      "name": "Upload",
+      "description": "Endpoints para la subida de archivos (upload.routes.js)."
+    },
+    {
+      "name": "Dashboard",
+      "description": "Endpoints para obtener métricas y datos consolidados."
+    },
+    {
+      "name": "IA - Metrics",
+      "description": "Endpoints para que servicios de IA consuman datos del sistema."
+    },
+    {
+      "name": "Skills",
+      "description": "Gestión de habilidades y tecnologías."
+    }
+  ],
+  "paths": {
+    "/user/register": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Registrar una nueva solicitud de usuario",
+        "description": "Crea una nueva solicitud de registro que debe ser aprobada por un administrador. Se envía un email al administrador para la autorización.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Solicitud de registro enviada con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de registro incompletos o el email ya existe."
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Iniciar sesión de usuario",
+        "description": "Autentica a un usuario activo con su email y contraseña, y devuelve el perfil del usuario junto con un token JWT.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Autenticación exitosa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas, cuenta no activa, pendiente o rechazada."
+          }
+        }
+      }
+    },
+    "/user/prueba": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Obtener lista de todos los usuarios (Admin)",
+        "description": "Devuelve una lista de todos los usuarios activos en el sistema. Requiere permisos de administrador.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios obtenida exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/authorize/{token}/{action}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Procesar aprobación o rechazo de un usuario",
+        "description": "Endpoint utilizado a través de un enlace de email para que un administrador apruebe o rechace una solicitud de registro pendiente.",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Token de autorización único.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "description": "Acción a realizar.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "approve",
+                "reject"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Acción procesada exitosamente. Muestra un mensaje HTML de confirmación.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "example": "<h1>¡Acción completada!</h1>"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El token es inválido, ha expirado o la solicitud ya fue procesada."
+          }
+        }
+      }
+    },
+    "/user/update/{email}": {
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Actualizar información de un usuario",
+        "description": "Permite actualizar el nombre, rol o estado de un usuario existente, identificado por su email. Requiere permisos.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Email del usuario a actualizar.",
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario actualizado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserSuccessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado."
+          }
+        }
+      }
+    },
+    "/user/delete/{email}": {
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Eliminar un usuario permanentemente (Hard Delete)",
+        "description": "Elimina por completo el registro de un usuario de la base de datos, identificado por su email. Esta acción es irreversible. Requiere permisos elevados.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Email del usuario a eliminar.",
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario eliminado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Usuario eliminado correctamente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado."
+          }
+        }
+      }
+    },
+    "/user/auth/editpws": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Solicitar reseteo de contraseña",
+        "description": "Inicia el flujo para resetear la contraseña de un usuario. Si el email existe y está activo, se envía un correo con instrucciones. La respuesta siempre es genérica para no revelar si un email está registrado.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestPasswordResetPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Solicitud procesada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/auth/resetpassword": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Establecer una nueva contraseña",
+        "description": "Permite al usuario establecer una nueva contraseña usando el enlace o la información del correo de recuperación.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña actualizada con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Las contraseñas no coinciden o faltan datos."
+          },
+          "404": {
+            "description": "Usuario no encontrado o no activo."
+          }
+        }
+      }
+    },
+    "/collaborator/": {
+      "get": {
+        "tags": [
+          "Collaborators"
+        ],
+        "summary": "Obtener lista de colaboradores",
+        "description": "Devuelve una lista de todos los colaboradores activos. Permite filtrar por un término de búsqueda en nombre, apellido, DNI o email.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Término de búsqueda para filtrar colaboradores.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de colaboradores obtenida exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaboratorListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Collaborators"
+        ],
+        "summary": "Registrar un nuevo colaborador",
+        "description": "Crea un nuevo registro de colaborador en la base de datos. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterCollaboratorPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Colaborador registrado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterCollaboratorSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos incompletos, o DNI/email ya existen."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          }
+        }
+      }
+    },
+    "/collaborator/contracts/expirations": {
+      "get": {
+        "tags": [
+          "Collaborators"
+        ],
+        "summary": "Revisar vencimiento de contratos",
+        "description": "Endpoint para iniciar la lógica de revisión de contratos por vencer. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta de marcador de posición.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          }
+        }
+      }
+    },
+    "/collaborator/{id}": {
+      "get": {
+        "tags": [
+          "Collaborators"
+        ],
+        "summary": "Obtener un colaborador por ID",
+        "description": "Devuelve los detalles completos de un colaborador específico. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB del colaborador.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles del colaborador.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleCollaboratorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Colaborador no encontrado."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Collaborators"
+        ],
+        "summary": "Actualizar un colaborador",
+        "description": "Modifica los datos de un colaborador existente. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB del colaborador.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCollaboratorPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Colaborador actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCollaboratorSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Colaborador no encontrado."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Collaborators"
+        ],
+        "summary": "Eliminar un colaborador (Soft Delete)",
+        "description": "Marca un colaborador como eliminado. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB del colaborador.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colaborador marcado como eliminado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteCollaboratorSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Colaborador no encontrado."
+          }
+        }
+      }
+    },
+    "/collaborator/{id}/asignar": {
+      "put": {
+        "tags": [
+          "Collaborators"
+        ],
+        "summary": "Actualizar colaborador (ruta alternativa)",
+        "description": "Ruta alternativa para modificar los datos de un colaborador. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB del colaborador.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCollaboratorPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Colaborador actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollaboratorBase"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Colaborador no encontrado."
+          }
+        }
+      }
+    },
+    "/collaborator/{id}/proyectos": {
+      "delete": {
+        "tags": [
+          "Collaborators"
+        ],
+        "summary": "Remover un proyecto de un colaborador",
+        "description": "Elimina un proyecto de la lista de proyectos asignados. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB del colaborador.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveProjectPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta de marcador de posición para la eliminación del proyecto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta el ID del proyecto en el cuerpo de la solicitud."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Colaborador no encontrado."
+          }
+        }
+      }
+    },
+    "/projects/": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Obtener lista de proyectos",
+        "description": "Devuelve una lista de todos los proyectos activos, enriquecidos con el estado de su contrato.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Término para buscar por nombre.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de proyectos obtenida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/register": {
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Registrar un nuevo proyecto (simple)",
+        "description": "Crea un nuevo proyecto. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterProjectPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proyecto registrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o nombre ya existe."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          }
+        }
+      }
+    },
+    "/projects/{id}/assignedPersons/{personId}": {
+      "put": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Editar persona asignada a un proyecto",
+        "description": "Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          },
+          {
+            "name": "personId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssignedPersonPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Persona actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Proyecto o persona no encontrada."
+          }
+        }
+      }
+    },
+    "/vacancie/": {
+      "get": {
+        "tags": [
+          "Vacancies"
+        ],
+        "summary": "Obtener lista de vacantes con filtros",
+        "description": "Devuelve una lista de vacantes. Por defecto, excluye las 'Finalizadas'. Permite filtrar por nombre de proyecto, seniority, estado y un término de búsqueda general.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Búsqueda general por nombre de vacante.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projectName",
+            "in": "query",
+            "description": "Filtrar por nombre del proyecto asociado.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "seniority",
+            "in": "query",
+            "description": "Filtrar por seniority.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filtrar por estado exacto (ej. 'Abierta', 'Finalizada').",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Abierta",
+                "En Proceso",
+                "Finalizada"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de vacantes obtenida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VacancyListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Vacancies"
+        ],
+        "summary": "Registrar una nueva vacante",
+        "description": "Crea una nueva vacante. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterVacancyPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Vacante registrada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterVacancySuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o skills no existentes."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "El proyecto asociado no existe."
+          }
+        }
+      }
+    },
+    "/vacancie/{id}": {
+      "get": {
+        "tags": [
+          "Vacancies"
+        ],
+        "summary": "Obtener una vacante por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles de la vacante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleVacancyResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vacante no encontrada."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Vacancies"
+        ],
+        "summary": "Actualizar una vacante",
+        "description": "Actualiza una vacante. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVacancyPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vacante actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterVacancySuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Vacante o proyecto asociado no encontrado."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Vacancies"
+        ],
+        "summary": "Eliminar una vacante (Soft Delete)",
+        "description": "Marca una vacante como eliminada. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacante marcada como eliminada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteVacancySuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Vacante no encontrada o ya eliminada."
+          }
+        }
+      }
+    },
+    "/technologies/": {
+      "get": {
+        "tags": [
+          "Technologies"
+        ],
+        "summary": "Obtener lista de todas las tecnologías",
+        "description": "Devuelve un array de todas las tecnologías registradas, ordenadas alfabéticamente.",
+        "responses": {
+          "200": {
+            "description": "Lista de tecnologías obtenida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TechnologyListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Technologies"
+        ],
+        "summary": "Añadir una nueva tecnología",
+        "description": "Crea una nueva tecnología. El nombre debe ser único. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTechnologyPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tecnología añadida exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TechnologySuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta el nombre de la tecnología."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "409": {
+            "description": "Ya existe una tecnología con ese nombre (Conflicto)."
+          }
+        }
+      }
+    },
+    "/technologies/{id}": {
+      "put": {
+        "tags": [
+          "Technologies"
+        ],
+        "summary": "Editar una tecnología",
+        "description": "Actualiza el nombre de una tecnología existente. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la tecnología.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTechnologyPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tecnología actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TechnologySuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Tecnología no encontrada."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Technologies"
+        ],
+        "summary": "Eliminar una tecnología",
+        "description": "Elimina permanentemente una tecnología. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la tecnología.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tecnología eliminada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteTechnologySuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Tecnología no encontrada."
+          }
+        }
+      }
+    },
+    "/notification/notiContracts": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Activar revisión de vencimientos de contratos",
+        "description": "Dispara el proceso de servidor que revisa todos los contratos de colaboradores y genera las notificaciones correspondientes si están a 30 días o menos de vencer.",
+        "responses": {
+          "200": {
+            "description": "Proceso iniciado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckProcessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notification/notiProjects": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Activar revisión de vencimientos de proyectos",
+        "description": "Dispara el proceso de servidor que revisa todos los proyectos y genera las notificaciones correspondientes si están a 30 días o menos de su fecha de fin.",
+        "responses": {
+          "200": {
+            "description": "Proceso iniciado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckProcessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notification/markAsRead": {
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Marcar una notificación como leída",
+        "description": "Un usuario marca una notificación específica (identificada por su tipo y el ID del recurso) como leída.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkAsReadPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notificación marcada como leída.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleSuccessMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Faltan parámetros en la solicitud."
+          },
+          "404": {
+            "description": "Notificación no encontrada para ese usuario."
+          }
+        }
+      }
+    },
+    "/notification/markAllAsRead": {
+      "post": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Marcar todas las notificaciones como leídas",
+        "description": "Un usuario marca todas las notificaciones que le han sido enviadas como leídas.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkAllAsReadPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Todas las notificaciones marcadas como leídas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimpleSuccessMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta el email en la solicitud."
+          }
+        }
+      }
+    },
+    "/notification/byUser/{email}": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Obtener notificaciones no leídas por usuario",
+        "description": "Devuelve una lista de todas las notificaciones enviadas a un usuario específico que aún no ha marcado como leídas.",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "description": "Email del usuario.",
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de notificaciones no leídas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationListForUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notification/byManager": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Obtener estado de lectura de notificaciones para managers",
+        "description": "Devuelve una lista de notificaciones y detalla qué destinatarios (de la lista de emails proporcionada) aún no la han leído.",
+        "parameters": [
+          {
+            "name": "emails",
+            "in": "query",
+            "required": true,
+            "description": "Lista de emails de managers a consultar, separados por coma.",
+            "schema": {
+              "type": "string",
+              "example": "manager1@example.com,manager2@example.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estado de lectura de notificaciones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationListForManagerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notification/all": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Obtener todas las notificaciones (Admin)",
+        "description": "Devuelve todas las notificaciones existentes en la base de datos, sin ningún filtro.",
+        "responses": {
+          "200": {
+            "description": "Lista completa de notificaciones.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullNotificationListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notification/ordered": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Obtener notificaciones ordenadas",
+        "description": "Devuelve todas las notificaciones ordenadas por fecha de envío, ya sea las más nuevas o las más antiguas primero.",
+        "parameters": [
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Criterio de ordenación.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "newest",
+                "oldest"
+              ],
+              "default": "newest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de notificaciones ordenadas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullNotificationListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/configuration/columns/{section}": {
+      "get": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Obtener configuración de columnas para una tabla",
+        "description": "Devuelve la configuración de columnas (visibilidad, orden, etc.) para una sección específica de la aplicación (ej. 'users', 'projects').",
+        "parameters": [
+          {
+            "name": "section",
+            "in": "path",
+            "required": true,
+            "description": "El identificador de la sección de la tabla.",
+            "schema": {
+              "type": "string",
+              "example": "users"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Configuración obtenida exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableConfigurationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No se encontró configuración para la sección especificada."
+          }
+        }
+      }
+    },
+    "/configuration/updateColumns": {
+      "put": {
+        "tags": [
+          "Configuration"
+        ],
+        "summary": "Actualizar configuración de columnas",
+        "description": "Crea o actualiza la configuración de columnas para una sección de tabla. Reemplaza la configuración existente con la nueva proporcionada.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTableColumnsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Configuración actualizada exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableConfigurationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos (falta 'tableType', 'columns' no es un array, o las columnas tienen un formato incorrecto)."
+          }
+        }
+      }
+    },
+    "/roles/": {
+      "get": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Obtener todos los roles",
+        "description": "Devuelve una lista de todos los roles definidos en el sistema.",
+        "responses": {
+          "200": {
+            "description": "Lista de roles obtenida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Crear un nuevo rol",
+        "description": "Crea un nuevo rol. El nombre del rol debe ser único. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRolePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rol creado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateRoleSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Faltan campos requeridos (nombre o descripción)."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "409": {
+            "description": "Ya existe un rol con ese nombre (Conflicto)."
+          }
+        }
+      }
+    },
+    "/roles/{id}": {
+      "put": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Actualizar un rol",
+        "description": "Actualiza los datos de un rol existente. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB del rol.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRolePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rol actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateRoleSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No se proporcionaron datos para actualizar."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Rol no encontrado."
+          },
+          "409": {
+            "description": "El nuevo nombre del rol ya existe."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Roles"
+        ],
+        "summary": "Eliminar un rol",
+        "description": "Elimina permanentemente un rol. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB del rol.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rol eliminado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteRoleSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Rol no encontrado."
+          }
+        }
+      }
+    },
+    "/stateprojects/": {
+      "get": {
+        "tags": [
+          "StateProjects"
+        ],
+        "summary": "Obtener todos los estados de proyecto",
+        "description": "Devuelve una lista de todos los estados definidos que un proyecto puede tener, ordenados por fecha de creación.",
+        "responses": {
+          "200": {
+            "description": "Lista de estados de proyecto obtenida exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StateProjectListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/basic-fields/": {
+      "get": {
+        "tags": [
+          "BasicFields"
+        ],
+        "summary": "Obtener todas las definiciones de campos básicos",
+        "description": "Devuelve una lista de todas las definiciones de campos básicos del sistema, ordenadas por el campo 'order'.",
+        "responses": {
+          "200": {
+            "description": "Lista de definiciones de campos básicos obtenida exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BasicFieldDefListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/extra-fields/": {
+      "get": {
+        "tags": [
+          "ExtraFields"
+        ],
+        "summary": "Obtener todas las definiciones de campos extra",
+        "description": "Devuelve una lista de todas las definiciones de campos extra personalizables, ordenadas por el campo 'order'.",
+        "responses": {
+          "200": {
+            "description": "Lista de definiciones de campos extra obtenida exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtraFieldDefListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ExtraFields"
+        ],
+        "summary": "Crear una nueva definición de campo extra",
+        "description": "Crea una nueva definición de campo extra. La 'key' debe ser única.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExtraFieldPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Definición de campo extra creada exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtraFieldDefBase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación o la 'key' ya existe."
+          }
+        }
+      }
+    },
+    "/extra-fields/{id}": {
+      "put": {
+        "tags": [
+          "ExtraFields"
+        ],
+        "summary": "Actualizar una definición de campo extra",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la definición del campo.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExtraFieldPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Definición de campo actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtraFieldDefBase"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Definición de campo no encontrada."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ExtraFields"
+        ],
+        "summary": "Eliminar una definición de campo extra",
+        "description": "Elimina una definición de campo extra solo si no está siendo utilizada por ningún registro de 'Personnel'.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la definición del campo.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Definición eliminada exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteSuccessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Definición de campo no encontrada."
+          },
+          "409": {
+            "description": "Conflicto. El campo está en uso y no se puede eliminar.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jornadas/": {
+      "get": {
+        "tags": [
+          "Jornada"
+        ],
+        "summary": "Obtener todas las jornadas laborales",
+        "description": "Devuelve una lista de todas las definiciones de jornadas laborales disponibles.",
+        "responses": {
+          "200": {
+            "description": "Lista de jornadas obtenida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JornadaListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Jornada"
+        ],
+        "summary": "Crear una nueva jornada",
+        "description": "Crea una nueva definición de jornada. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateJornadaPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Jornada creada exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JornadaSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "409": {
+            "description": "Conflicto, ya existe una jornada con ese nombre."
+          }
+        }
+      }
+    },
+    "/ia/recommend-team": {
+      "post": {
+        "tags": [
+          "IA"
+        ],
+        "summary": "Obtener recomendación de equipo",
+        "description": "Envía los detalles de un proyecto y las posiciones requeridas a un servicio externo de IA para recibir una propuesta de equipo. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Detalles del proyecto y los roles necesarios.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendTeamPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recomendación generada exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendTeamSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "La solicitud es inválida (faltan campos requeridos)."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "503": {
+            "description": "El servicio de IA no está configurado o no está disponible."
+          },
+          "504": {
+            "description": "El servicio de IA tardó demasiado en responder (Gateway Timeout)."
+          }
+        }
+      }
+    },
+    "/upload/image": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Subir un archivo de imagen",
+        "description": "Sube un archivo a un servicio de almacenamiento en la nube (como S3) y devuelve una clave única para identificarlo. Esta clave NO es una URL pública.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadImagePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Archivo subido exitosamente. Devuelve la clave del archivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadImageSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No se adjuntó ningún archivo en la solicitud."
+          }
+        }
+      }
+    },
+    "/upload/image/{key}": {
+      "get": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Obtener URL temporal de un archivo",
+        "description": "A partir de una clave de archivo obtenida previamente, genera y devuelve una URL firmada y temporal para acceder al archivo de forma segura.",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "description": "La clave única del archivo que fue devuelta por el endpoint de subida.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "URL generada exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSignedUrlSuccessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "La clave proporcionada no corresponde a ningún archivo existente."
+          }
+        }
+      }
+    },
+    "/dashboard/metrics": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Obtener todas las métricas del dashboard",
+        "description": "Devuelve un objeto completo con todas las métricas calculadas necesarias para renderizar el dashboard principal. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Métricas obtenidas exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardMetricsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "500": {
+            "description": "Error interno al calcular las métricas."
+          }
+        }
+      }
+    },
+    "/ia/metrics": {
+      "get": {
+        "tags": [
+          "IA - Metrics"
+        ],
+        "summary": "Obtener métricas del sistema para IA",
+        "description": "Endpoint especializado que devuelve un resumen de métricas clave (colaboradores activos, asignaciones, vacantes, tecnologías) en un formato simple, diseñado para ser consumido por servicios de inteligencia artificial.",
+        "responses": {
+          "200": {
+            "description": "Métricas calculadas y devueltas exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IaMetricsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor al calcular las métricas."
+          }
+        }
+      }
+    },
+    "/ia/chat": {
+      "post": {
+        "tags": [
+          "IA"
+        ],
+        "summary": "Interactuar con el chatbot Rubiko",
+        "description": "Envía un mensaje de texto al servicio de IA y recibe una respuesta conversacional.",
+        "requestBody": {
+          "required": true,
+          "description": "Mensaje del usuario para la IA.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta de la IA recibida exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Falta el campo 'message' en la solicitud."
+          },
+          "500": {
+            "description": "Error de configuración del servidor (URL de la IA no definida)."
+          },
+          "503": {
+            "description": "No se pudo conectar con el servicio de IA."
+          }
+        }
+      }
+    },
+    "/jornadas/{id}": {
+      "get": {
+        "tags": [
+          "Jornada"
+        ],
+        "summary": "Obtener una jornada por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la jornada.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles de la jornada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JornadaBase"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Jornada no encontrada."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Jornada"
+        ],
+        "summary": "Actualizar una jornada",
+        "description": "Actualiza los datos de una jornada existente. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la jornada.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateJornadaPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Jornada actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JornadaSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Jornada no encontrada."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Jornada"
+        ],
+        "summary": "Eliminar una jornada",
+        "description": "Elimina permanentemente una jornada. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la jornada.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Jornada eliminada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteJornadaSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Jornada no encontrada."
+          }
+        }
+      }
+    },
+    "/projects/{id}": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Obtener un proyecto por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles del proyecto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleProjectResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Proyecto no encontrado."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Actualizar un proyecto",
+        "description": "Actualiza un proyecto. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proyecto actualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Proyecto no encontrado."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Eliminar un proyecto (Soft Delete)",
+        "description": "Marca un proyecto como eliminado. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proyecto eliminado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteProjectSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Proyecto no encontrado."
+          }
+        }
+      }
+    },
+    "/projects/register-relations": {
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Registrar proyecto con relaciones",
+        "description": "Crea un nuevo proyecto y simultáneamente actualiza colaboradores y crea vacantes asociadas. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterWithRelationsPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proyecto y relaciones procesadas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterWithRelationsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          }
+        }
+      }
+    },
+    "/projects/{id}/assigned-persons": {
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Añadir persona a un proyecto",
+        "description": "Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignedPerson"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Persona asignada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Proyecto no encontrado."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Remover persona de un proyecto",
+        "description": "Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveAssignedPersonPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Persona removida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Proyecto no encontrado."
+          }
+        }
+      }
+    },
+    "/skills/": {
+      "get": {
+        "tags": [
+          "Skills"
+        ],
+        "summary": "Obtener todas las habilidades",
+        "description": "Devuelve una lista de habilidades. Puede filtrarse para obtener solo las activas o inactivas.",
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "description": "Filtrar por estado. 'true' para activas, 'false' para inactivas. Si se omite, devuelve todas.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de habilidades obtenida.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Skills"
+        ],
+        "summary": "Crear una nueva habilidad",
+        "description": "Crea una nueva habilidad. El nombre debe ser único. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSkillPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Habilidad creada exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSkillSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Faltan campos requeridos."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "409": {
+            "description": "Ya existe una habilidad con ese nombre."
+          }
+        }
+      }
+    },
+    "/skills/{id}": {
+      "put": {
+        "tags": [
+          "Skills"
+        ],
+        "summary": "Actualizar una habilidad",
+        "description": "Actualiza una habilidad existente. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la habilidad.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSkillPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Habilidad actualizada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSkillSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No se proporcionaron datos para actualizar."
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Habilidad no encontrada."
+          },
+          "409": {
+            "description": "El nuevo nombre de la habilidad ya existe."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Skills"
+        ],
+        "summary": "Eliminar una habilidad",
+        "description": "Elimina permanentemente una habilidad. Requiere rol de 'administrador'.",
+        "security": [
+          {
+            "accessTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID de MongoDB de la habilidad.",
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Habilidad eliminada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteSkillSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado."
+          },
+          "403": {
+            "description": "Permisos insuficientes."
+          },
+          "404": {
+            "description": "Habilidad no encontrada."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "accessTokenAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Token de acceso JWT para rutas protegidas. Se envía en el header 'Authorization' como 'Bearer <token>'."
+      }
+    },
+    "schemas": {
+      "UserStatusEnum": {
+        "type": "string",
+        "description": "Estado de la cuenta del usuario.",
+        "enum": [
+          "pending",
+          "active",
+          "rejected"
+        ]
+      },
+      "UserBase": {
+        "type": "object",
+        "description": "Información base de un usuario, sin incluir datos sensibles como la contraseña.",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true,
+            "description": "ID único del usuario en MongoDB."
+          },
+          "name": {
+            "type": "string",
+            "example": "Juan Pérez"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "juan.perez@example.com"
+          },
+          "rol": {
+            "type": "string",
+            "description": "Rol del usuario en el sistema.",
+            "example": "moderator"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserStatusEnum"
+          },
+          "iamge": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL de la imagen de perfil del usuario."
+          }
+        }
+      },
+      "UserListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/UserBase"
+        }
+      },
+      "RegisterPayload": {
+        "type": "object",
+        "description": "Datos necesarios para registrar un nuevo usuario.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Nuevo Usuario"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "nuevo@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "password123"
+          },
+          "rol": {
+            "type": "string",
+            "example": "user"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password",
+          "rol"
+        ]
+      },
+      "RegisterSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Solicitud de registro enviada. Pendiente de autorización."
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserBase"
+          }
+        }
+      },
+      "LoginPayload": {
+        "type": "object",
+        "description": "Credenciales para iniciar sesión.",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "juan.perez@example.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "password123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Usuario logueado correctamente."
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserBase"
+          },
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "UpdateUserPayload": {
+        "type": "object",
+        "description": "Campos actualizables para un usuario. Todos son opcionales.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserStatusEnum"
+          }
+        }
+      },
+      "UpdateUserSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Usuario actualizado correctamente."
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserBase"
+          }
+        }
+      },
+      "RequestPasswordResetPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "usuario.olvidadizo@example.com"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "newPassword": {
+            "type": "string",
+            "format": "password"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": [
+          "email",
+          "newPassword",
+          "confirmPassword"
+        ]
+      },
+      "SimpleSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SimpleMessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ProjectInfo": {
+        "type": "object",
+        "description": "Información de un proyecto asignado a un colaborador.",
+        "properties": {
+          "projectId": {
+            "type": "object",
+            "description": "Datos poblados del proyecto asignado.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "ObjectId"
+              },
+              "name": {
+                "type": "string",
+                "example": "Proyecto Alpha"
+              },
+              "client": {
+                "type": "string",
+                "example": "Cliente Global"
+              }
+            }
+          },
+          "rol": {
+            "type": "string",
+            "example": "Backend Developer"
+          },
+          "horasAsignadas": {
+            "type": "number",
+            "example": 40
+          },
+          "seniority": {
+            "type": "string",
+            "example": "Senior"
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RolSeniorityInfo": {
+        "type": "object",
+        "properties": {
+          "rol": {
+            "type": "string",
+            "example": "DevOps Engineer"
+          },
+          "seniority": {
+            "type": "string",
+            "example": "Semi-Senior"
+          }
+        },
+        "required": [
+          "rol",
+          "seniority"
+        ]
+      },
+      "CollaboratorBase": {
+        "type": "object",
+        "description": "Representación completa de un colaborador.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "dni": {
+            "type": "string",
+            "example": "12345678A"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Ana"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "García"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "ana.garcia@example.com"
+          },
+          "Proyectos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectInfo"
+            }
+          },
+          "tecnologias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Node.js",
+              "React",
+              "MongoDB"
+            ]
+          },
+          "estado": {
+            "type": "string",
+            "example": "Activo"
+          },
+          "fin_contrato": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "honorarios": {
+            "type": "number",
+            "example": 5000
+          },
+          "start_contrato": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "horasAsignadas": {
+            "type": "number"
+          },
+          "observacion": {
+            "type": "number"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "delete_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true,
+            "nullable": true
+          },
+          "last_edited_by": {
+            "type": "string"
+          },
+          "last_edited_on": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolSeniorityInfo"
+            }
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL de la imagen del colaborador."
+          }
+        }
+      },
+      "CollaboratorListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CollaboratorBase"
+        }
+      },
+      "RegisterCollaboratorPayload": {
+        "type": "object",
+        "properties": {
+          "dni": {
+            "type": "string",
+            "example": "12345678A"
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Carlos"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Sánchez"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "carlos.sanchez@example.com"
+          },
+          "estado": {
+            "type": "string",
+            "example": "Activo"
+          }
+        },
+        "required": [
+          "dni",
+          "first_name",
+          "last_name",
+          "email",
+          "estado"
+        ],
+        "description": "Datos mínimos para registrar un colaborador. Otros campos como fin_contrato, honorarios, etc., son opcionales."
+      },
+      "RegisterCollaboratorSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Colaborador registrado correctamente."
+          },
+          "colaborador": {
+            "$ref": "#/components/schemas/CollaboratorBase"
+          }
+        }
+      },
+      "SingleCollaboratorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "collaborator": {
+            "$ref": "#/components/schemas/CollaboratorBase"
+          }
+        }
+      },
+      "UpdateCollaboratorPayload": {
+        "type": "object",
+        "description": "Campos actualizables para un colaborador. DNI, id y _id no son modificables.",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "Proyectos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectInfo"
+            }
+          },
+          "tecnologias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "estado": {
+            "type": "string"
+          },
+          "fin_contrato": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "honorarios": {
+            "type": "number"
+          },
+          "start_contrato": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "horasAsignadas": {
+            "type": "number"
+          },
+          "observacion": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RolSeniorityInfo"
+            }
+          }
+        }
+      },
+      "UpdateCollaboratorSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Colaborador actualizado correctamente."
+          },
+          "colaborador": {
+            "$ref": "#/components/schemas/CollaboratorBase"
+          }
+        }
+      },
+      "DeleteCollaboratorSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Colaborador marcado como eliminado correctamente."
+          },
+          "id": {
+            "type": "string",
+            "format": "ObjectId"
+          }
+        }
+      },
+      "RemoveProjectPayload": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "format": "ObjectId",
+            "description": "ID del proyecto a remover de la lista del colaborador."
+          }
+        },
+        "required": [
+          "projectId"
+        ]
+      },
+      "AssignedPerson": {
+        "type": "object",
+        "description": "Representa una persona asignada a un proyecto.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Ana García"
+          },
+          "id": {
+            "type": "string",
+            "description": "DNI/ID único de la persona asignada.",
+            "example": "12345678A"
+          },
+          "rol": {
+            "type": "string",
+            "example": "Backend Developer"
+          },
+          "horasAsignadas": {
+            "type": "number",
+            "example": 40
+          },
+          "tecnologias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Node.js",
+              "Express"
+            ]
+          },
+          "seniority": {
+            "type": "string",
+            "example": "Senior"
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProjectContractStatus": {
+        "type": "object",
+        "description": "Estado dinámico del contrato del proyecto, calculado en tiempo real.",
+        "properties": {
+          "daysRemaining": {
+            "type": "integer",
+            "nullable": true,
+            "example": 25
+          },
+          "alertLevel": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "expired",
+              "due_today",
+              "warning",
+              "on_time"
+            ],
+            "example": "warning"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true,
+            "example": "Proyecto vence en 25 día(s)"
+          }
+        }
+      },
+      "ProjectBase": {
+        "type": "object",
+        "description": "Representación completa de un proyecto.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "managerId": {
+            "type": "string",
+            "example": "mgr_001"
+          },
+          "managerName": {
+            "type": "string",
+            "example": "Gerente de Proyecto"
+          },
+          "managerVisibleInOrgChart": {
+            "type": "boolean",
+            "default": true
+          },
+          "ia_generated": {
+            "type": "boolean",
+            "default": false,
+            "description": "Indica si el proyecto fue generado por la IA."
+          },
+          "taxonId": {
+            "type": "number",
+            "example": 701
+          },
+          "name": {
+            "type": "string",
+            "example": "Sistema de Gestión Alpha"
+          },
+          "client": {
+            "type": "string",
+            "example": "Cliente Global"
+          },
+          "status": {
+            "type": "string",
+            "example": "En Progreso"
+          },
+          "phase": {
+            "type": "string",
+            "example": "Desarrollo"
+          },
+          "projectType": {
+            "type": "string",
+            "example": "Desarrollo de Software"
+          },
+          "assignedPersons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssignedPerson"
+            }
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "image": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Gobierno",
+              "Privado",
+              "Inversion"
+            ]
+          },
+          "budget": {
+            "type": "number",
+            "minimum": 0
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "last_edited_by": {
+            "type": "string"
+          },
+          "last_edited_on": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "contractStatus": {
+            "$ref": "#/components/schemas/ProjectContractStatus"
+          }
+        }
+      },
+      "ProjectListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectBase"
+            }
+          }
+        }
+      },
+      "SingleProjectResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProjectBase"
+          }
+        }
+      },
+      "RegisterProjectPayload": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProjectBase"
+          }
+        ],
+        "description": "Datos necesarios para registrar un nuevo proyecto. 'id' y campos de solo lectura serán ignorados.",
+        "required": [
+          "managerId",
+          "managerName",
+          "managerVisibleInOrgChart",
+          "name",
+          "client",
+          "status",
+          "projectType",
+          "startDate",
+          "endDate",
+          "category"
+        ]
+      },
+      "ProjectSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string"
+          },
+          "project": {
+            "$ref": "#/components/schemas/ProjectBase"
+          }
+        }
+      },
+      "UpdateProjectPayload": {
+        "type": "object",
+        "description": "Campos actualizables para un proyecto. 'id' y otros campos de solo lectura no se pueden modificar.",
+        "properties": {
+          "managerName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "client": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "projectType": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Gobierno",
+              "Privado",
+              "Inversion"
+            ]
+          },
+          "budget": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      },
+      "DeleteProjectSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Proyecto marcado como eliminado correctamente."
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "ObjectId"
+              },
+              "deleted_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "vacancies_deleted_count": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "AddAssignedPersonPayload": {
+        "$ref": "#/components/schemas/AssignedPerson"
+      },
+      "RemoveAssignedPersonPayload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "El DNI/ID de la persona a remover del proyecto.",
+            "example": "12345678A"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "SkillInput": {
+        "type": "object",
+        "description": "Nombre de una habilidad o tecnología requerida.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "React"
+          }
+        }
+      },
+      "SkillOutput": {
+        "type": "object",
+        "description": "Habilidad o tecnología poblada con su ID y nombre.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ObjectId"
+          },
+          "name": {
+            "type": "string",
+            "example": "React"
+          }
+        }
+      },
+      "VacancyBase": {
+        "type": "object",
+        "description": "Representación completa de una vacante.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "manager_id": {
+            "type": "string",
+            "nullable": true,
+            "example": "mgr_001"
+          },
+          "manager_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Gerente de Contratación"
+          },
+          "manager_visible_in_org_chart": {
+            "type": "boolean",
+            "default": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Descripción detallada de la vacante."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Abierta",
+              "En Proceso",
+              "Finalizada"
+            ],
+            "default": "Abierta"
+          },
+          "projectId": {
+            "type": "object",
+            "nullable": true,
+            "description": "Datos poblados del proyecto asociado (si existe).",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "ObjectId"
+              },
+              "name": {
+                "type": "string",
+                "example": "Sistema de Gestión Alpha"
+              },
+              "client": {
+                "type": "string",
+                "example": "Cliente Global"
+              },
+              "status": {
+                "type": "string",
+                "example": "En Progreso"
+              }
+            }
+          },
+          "vacancieName": {
+            "type": "string",
+            "example": "Desarrollador Full-Stack"
+          },
+          "time": {
+            "type": "number",
+            "description": "Dedicación.",
+            "example": 100
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "seniority": {
+            "type": "string",
+            "example": "Senior"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillOutput"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "last_edited_by": {
+            "type": "string"
+          },
+          "last_edited_on": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "VacancyListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/VacancyBase"
+        }
+      },
+      "SingleVacancyResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/VacancyBase"
+          }
+        }
+      },
+      "RegisterVacancyPayload": {
+        "type": "object",
+        "description": "Datos para registrar una nueva vacante. Las 'skills' se envían como un array de objetos con el nombre de la tecnología.",
+        "properties": {
+          "manager_id": {
+            "type": "string",
+            "nullable": true,
+            "example": "mgr_001"
+          },
+          "manager_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Gerente de Contratación"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "ObjectId",
+            "nullable": true,
+            "description": "ID del proyecto al que pertenece la vacante."
+          },
+          "vacancieName": {
+            "type": "string",
+            "example": "Analista QA"
+          },
+          "time": {
+            "type": "number",
+            "example": 80
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "seniority": {
+            "type": "string",
+            "example": "Semi-Senior"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillInput"
+            },
+            "example": [
+              {
+                "name": "Cypress"
+              },
+              {
+                "name": "Jira"
+              }
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Abierta",
+              "En Proceso",
+              "Finalizada"
+            ]
+          }
+        },
+        "required": [
+          "vacancieName",
+          "time",
+          "orderDate",
+          "startDate",
+          "seniority"
+        ]
+      },
+      "RegisterVacancySuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string"
+          },
+          "vacancie": {
+            "$ref": "#/components/schemas/VacancyBase"
+          }
+        }
+      },
+      "UpdateVacancyPayload": {
+        "type": "object",
+        "description": "Campos actualizables para una vacante. 'id' y '_id' se ignoran.",
+        "properties": {
+          "manager_id": {
+            "type": "string"
+          },
+          "manager_name": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string",
+            "format": "ObjectId"
+          },
+          "vacancieName": {
+            "type": "string"
+          },
+          "time": {
+            "type": "number"
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "seniority": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillInput"
+            }
+          }
+        }
+      },
+      "UpdateVacancySuccessResponse": {
+        "$ref": "#/components/schemas/RegisterVacancySuccessResponse"
+      },
+      "DeleteVacancySuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "ObjectId"
+              },
+              "deleted_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "TechnologyBase": {
+        "type": "object",
+        "description": "Representación de una tecnología.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Node.js"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "TechnologyListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TechnologyBase"
+        }
+      },
+      "AddTechnologyPayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "TypeScript"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "TechnologySuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TechnologyBase"
+          }
+        }
+      },
+      "EditTechnologyPayload": {
+        "$ref": "#/components/schemas/AddTechnologyPayload"
+      },
+      "DeleteTechnologySuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Tecnología eliminada correctamente."
+          }
+        }
+      },
+      "Reader": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NotificationBase": {
+        "type": "object",
+        "description": "Representación base de una notificación en la base de datos.",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "type": {
+            "type": "string",
+            "example": "contract"
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "ID del contrato o proyecto relacionado.",
+            "example": "60d21b4667d0d8992e610c85"
+          },
+          "message": {
+            "type": "string",
+            "example": "El contrato de Ana García vence en 15 días"
+          },
+          "alertLevel": {
+            "type": "string",
+            "enum": [
+              "warning",
+              "expired",
+              "info"
+            ],
+            "example": "warning"
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "readers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reader"
+            }
+          }
+        }
+      },
+      "NotificationForUser": {
+        "type": "object",
+        "description": "Formato simplificado de una notificación para un usuario específico (no leída).",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "ObjectId"
+          },
+          "type": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "alertLevel": {
+            "type": "string",
+            "enum": [
+              "warning",
+              "expired",
+              "info"
+            ]
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "read": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "NotificationListForUserResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationForUser"
+            }
+          }
+        }
+      },
+      "CheckProcessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Contratos verificados y notificaciones generadas"
+          }
+        }
+      },
+      "MarkAsReadPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "ObjectId"
+          },
+          "type": {
+            "type": "string",
+            "example": "contract"
+          }
+        },
+        "required": [
+          "email",
+          "referenceId",
+          "type"
+        ]
+      },
+      "MarkAllAsReadPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "SimpleSuccessMessageResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "FullNotificationListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationBase"
+            }
+          }
+        }
+      },
+      "RecipientNotRead": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Carlos Sánchez"
+          }
+        }
+      },
+      "NotificationForManager": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "ObjectId"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "readers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reader"
+            }
+          },
+          "recipientsNotRead": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecipientNotRead"
+            }
+          }
+        }
+      },
+      "NotificationListForManagerResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationForManager"
+            }
+          }
+        }
+      },
+      "ColumnConfig": {
+        "type": "object",
+        "description": "Define la configuración de una columna individual en una tabla.",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "description": "El nombre a mostrar para la columna en la UI.",
+            "example": "Nombre de Usuario"
+          },
+          "field": {
+            "type": "string",
+            "description": "La clave del campo en el objeto de datos que corresponde a esta columna.",
+            "example": "name"
+          },
+          "order": {
+            "type": "number",
+            "description": "Un número para determinar el orden de la columna (opcional).",
+            "example": 1
+          }
+        }
+      },
+      "TableConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "section": {
+            "type": "string",
+            "description": "El identificador de la sección de la tabla.",
+            "example": "users"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ColumnConfig"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateTableColumnsPayload": {
+        "type": "object",
+        "description": "Datos necesarios para actualizar la configuración de columnas de una tabla.",
+        "properties": {
+          "tableType": {
+            "type": "string",
+            "description": "El identificador de la sección/tabla a configurar (ej. 'users', 'projects').",
+            "example": "users"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ColumnConfig"
+            }
+          }
+        },
+        "required": [
+          "tableType",
+          "columns"
+        ]
+      },
+      "UpdateTableColumnsSuccessResponse": {
+        "$ref": "#/components/schemas/TableConfigurationResponse"
+      },
+      "RoleBase": {
+        "type": "object",
+        "description": "Representación de un rol en el sistema.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre único del rol.",
+            "example": "Administrator"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción de los permisos y responsabilidades del rol.",
+            "example": "Tiene acceso a todas las funcionalidades del sistema."
+          },
+          "status": {
+            "type": "boolean",
+            "description": "Indica si el rol está activo (true) o inactivo (false).",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "RoleListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RoleBase"
+        }
+      },
+      "CreateRolePayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Content Moderator"
+          },
+          "description": {
+            "type": "string",
+            "example": "Puede editar y eliminar contenido generado por usuarios."
+          },
+          "status": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      },
+      "CreateRoleSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/RoleBase"
+          }
+        }
+      },
+      "UpdateRolePayload": {
+        "type": "object",
+        "description": "Campos actualizables para un rol. Todos son opcionales.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateRoleSuccessResponse": {
+        "$ref": "#/components/schemas/CreateRoleSuccessResponse"
+      },
+      "DeleteRoleSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Rol eliminado correctamente."
+          }
+        }
+      },
+      "StateProjectBase": {
+        "type": "object",
+        "description": "Representa un estado posible para un proyecto.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único definido para el estado (no el _id de mongo).",
+            "example": "IN_PROGRESS"
+          },
+          "status": {
+            "type": "string",
+            "description": "Nombre o descripción del estado.",
+            "example": "En Progreso"
+          }
+        }
+      },
+      "StateProjectListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/StateProjectBase"
+        }
+      },
+      "BasicFieldDefBase": {
+        "type": "object",
+        "description": "Representa la definición de un campo básico del sistema.",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "companyId": {
+            "type": "number",
+            "default": 1
+          },
+          "key": {
+            "type": "string",
+            "description": "Identificador único del campo (usado en el código).",
+            "example": "idExterno"
+          },
+          "label": {
+            "type": "string",
+            "description": "Etiqueta a mostrar para el campo en la UI.",
+            "example": "ID Externo"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "date"
+            ],
+            "description": "Tipo de dato del campo."
+          },
+          "order": {
+            "type": "number",
+            "description": "Número para ordenar los campos en la UI.",
+            "default": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "BasicFieldDefListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/BasicFieldDefBase"
+        }
+      },
+      "ExtraFieldDefBase": {
+        "type": "object",
+        "description": "Representa la definición de un campo extra personalizable.",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "companyId": {
+            "type": "number",
+            "default": 1
+          },
+          "key": {
+            "type": "string",
+            "description": "Identificador único del campo (usado en el código).",
+            "example": "licenciaConducir"
+          },
+          "label": {
+            "type": "string",
+            "description": "Etiqueta a mostrar para el campo en la UI.",
+            "example": "Licencia de Conducir"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "select",
+              "multiselect",
+              "date"
+            ],
+            "description": "Tipo de dato del campo."
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Lista de opciones para campos de tipo 'select' o 'multiselect'.",
+            "example": [
+              "Clase A",
+              "Clase B",
+              "Clase C"
+            ]
+          },
+          "order": {
+            "type": "number",
+            "description": "Número para ordenar los campos en la UI.",
+            "default": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type"
+        ]
+      },
+      "ExtraFieldDefListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExtraFieldDefBase"
+        }
+      },
+      "CreateExtraFieldPayload": {
+        "type": "object",
+        "description": "Datos para crear una nueva definición de campo extra.",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "select",
+              "multiselect",
+              "date"
+            ]
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "order": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type"
+        ]
+      },
+      "UpdateExtraFieldPayload": {
+        "$ref": "#/components/schemas/CreateExtraFieldPayload"
+      },
+      "DeleteSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Eliminado"
+          }
+        }
+      },
+      "ConflictResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Campo en uso, no se puede borrar"
+          }
+        }
+      },
+      "JornadaBase": {
+        "type": "object",
+        "description": "Representa una definición de jornada laboral.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre único de la jornada.",
+            "example": "Jornada Completa"
+          },
+          "hours": {
+            "type": "number",
+            "description": "Número de horas semanales.",
+            "example": 40
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción opcional.",
+            "example": "Jornada estándar de 8 horas diarias."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "JornadaListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/JornadaBase"
+        }
+      },
+      "RequestDetails": {
+        "type": "object",
+        "description": "Detalles generales de la solicitud de recomendación.",
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2024-12-01"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date",
+            "example": "2025-06-01"
+          },
+          "budget": {
+            "type": "number",
+            "example": 50000
+          },
+          "objective": {
+            "type": "string",
+            "example": "Desarrollar un nuevo módulo de e-commerce para la plataforma."
+          }
+        },
+        "required": [
+          "start_date"
+        ]
+      },
+      "PositionRequested": {
+        "type": "object",
+        "description": "Describe una posición o rol requerido para el equipo.",
+        "properties": {
+          "position_name": {
+            "type": "string",
+            "example": "Backend Developer"
+          },
+          "required_skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Node.js",
+              "Express",
+              "MongoDB",
+              "REST APIs"
+            ]
+          },
+          "seniority": {
+            "type": "string",
+            "example": "Senior"
+          },
+          "hours_per_week": {
+            "type": "number",
+            "example": 40
+          }
+        }
+      },
+      "RecommendTeamPayload": {
+        "type": "object",
+        "description": "Cuerpo de la solicitud para obtener una recomendación de equipo de la IA.",
+        "properties": {
+          "request_details": {
+            "$ref": "#/components/schemas/RequestDetails"
+          },
+          "positions_requested": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PositionRequested"
+            }
+          }
+        },
+        "required": [
+          "request_details",
+          "positions_requested"
+        ]
+      },
+      "TeamRecommendationData": {
+        "type": "object",
+        "description": "Respuesta del servicio de IA. La estructura puede variar, este es un ejemplo.",
+        "additionalProperties": true,
+        "example": {
+          "proposed_team": [
+            {
+              "position": "Backend Developer",
+              "recommended_collaborator": {
+                "id": "60d21b4667d0d8992e610c85",
+                "name": "Ana García",
+                "match_score": 0.95,
+                "justification": "Excelente compatibilidad de skills y seniority. Disponibilidad completa."
+              }
+            },
+            {
+              "position": "Frontend Developer",
+              "recommended_collaborator": {
+                "id": "60d21b4667d0d8992e610c86",
+                "name": "Carlos Sánchez",
+                "match_score": 0.89,
+                "justification": "Fuerte en React y disponible para las fechas solicitadas."
+              }
+            }
+          ],
+          "estimated_cost": 48500,
+          "risk_analysis": "Bajo. El equipo propuesto tiene experiencia probada en proyectos similares."
+        }
+      },
+      "RecommendTeamSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Recomendación de equipo generada exitosamente."
+          },
+          "data": {
+            "$ref": "#/components/schemas/TeamRecommendationData"
+          }
+        }
+      },
+      "UploadImagePayload": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "format": "binary",
+            "description": "El archivo de imagen a subir."
+          }
+        },
+        "required": [
+          "image"
+        ]
+      },
+      "UploadImageSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Archivo subido con éxito."
+          },
+          "imageKey": {
+            "type": "string",
+            "description": "La clave (nombre de archivo único) con la que se guardó el archivo en el almacenamiento en la nube. Esta clave es necesaria para obtener la URL de acceso.",
+            "example": "a1b2c3d4e5f6a1b2c3d4e5f6-nombre_del_archivo.jpg"
+          }
+        }
+      },
+      "GetSignedUrlSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "URL generada con éxito."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL firmada y temporal para acceder al archivo. Expira después de un tiempo definido (ej. 1 hora)."
+          }
+        }
+      },
+      "MetricasClave": {
+        "type": "object",
+        "description": "KPIs principales del estado de la empresa.",
+        "properties": {
+          "totalColaboradores": {
+            "type": "integer",
+            "example": 75
+          },
+          "proyectosActivos": {
+            "type": "integer",
+            "example": 12
+          },
+          "vacantesActivas": {
+            "type": "integer",
+            "example": 5
+          },
+          "totalTecnologias": {
+            "type": "integer",
+            "example": 40
+          }
+        }
+      },
+      "ContratacionesMensualesData": {
+        "type": "object",
+        "properties": {
+          "mes": {
+            "type": "string",
+            "example": "2024-05"
+          },
+          "nuevasContrataciones": {
+            "type": "integer",
+            "example": 3
+          }
+        }
+      },
+      "ContratacionesMensuales": {
+        "type": "object",
+        "description": "Datos para el gráfico de contrataciones en los últimos 12 meses.",
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "example": "Contrataciones por Mes (Últimos 12 meses)"
+          },
+          "datos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContratacionesMensualesData"
+            }
+          }
+        }
+      },
+      "EstadoDeProyectos": {
+        "type": "object",
+        "description": "Distribución de proyectos por estado (Ejecución vs. Terminado).",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "example": 15
+          },
+          "porEstado": {
+            "type": "object",
+            "properties": {
+              "Ejecución": {
+                "type": "integer",
+                "example": 12
+              },
+              "Terminado": {
+                "type": "integer",
+                "example": 3
+              }
+            }
+          }
+        }
+      },
+      "EstadoDeAsignacion": {
+        "type": "object",
+        "description": "Distribución de colaboradores activos según su carga de trabajo (cantidad de proyectos).",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "example": 75
+          },
+          "porEstado": {
+            "type": "object",
+            "properties": {
+              "Sobrecargado": {
+                "type": "integer",
+                "example": 5
+              },
+              "Al límite": {
+                "type": "integer",
+                "example": 15
+              },
+              "Normal": {
+                "type": "integer",
+                "example": 45
+              },
+              "Sin asignación": {
+                "type": "integer",
+                "example": 10
+              }
+            }
+          }
+        }
+      },
+      "TecnologiaTop": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "example": "Node.js"
+          },
+          "cantidad": {
+            "type": "integer",
+            "example": 25
+          }
+        }
+      },
+      "PersonasPorProyecto": {
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "type": "string",
+            "example": "Proyecto Alpha"
+          },
+          "cantidad": {
+            "type": "integer",
+            "example": 8
+          }
+        }
+      },
+      "DashboardMetricsResponse": {
+        "type": "object",
+        "description": "Respuesta completa con todas las métricas para el dashboard.",
+        "properties": {
+          "metricasClave": {
+            "$ref": "#/components/schemas/MetricasClave"
+          },
+          "contratacionesMensuales": {
+            "$ref": "#/components/schemas/ContratacionesMensuales"
+          },
+          "estadoDeProyectos": {
+            "$ref": "#/components/schemas/EstadoDeProyectos"
+          },
+          "estadoDeAsignacion": {
+            "$ref": "#/components/schemas/EstadoDeAsignacion"
+          },
+          "tecnologiasTop": {
+            "type": "array",
+            "description": "Lista de las tecnologías más utilizadas por los colaboradores activos.",
+            "items": {
+              "$ref": "#/components/schemas/TecnologiaTop"
+            }
+          },
+          "personasPorProyecto": {
+            "type": "array",
+            "description": "Lista de proyectos activos con la mayor cantidad de personas asignadas.",
+            "items": {
+              "$ref": "#/components/schemas/PersonasPorProyecto"
+            }
+          }
+        }
+      },
+      "IaMetricsResponse": {
+        "type": "object",
+        "description": "Resumen de métricas clave del sistema, formateadas para ser consumidas por un servicio de IA.",
+        "properties": {
+          "cantidad_colaboradores_activos": {
+            "type": "integer",
+            "description": "Número total de colaboradores cuyo estado es activo y no han sido eliminados.",
+            "example": 152
+          },
+          "total_asignaciones_en_proyectos": {
+            "type": "integer",
+            "description": "Suma total de todas las asignaciones de personas a proyectos activos.",
+            "example": 210
+          },
+          "cantidad_vacantes_abiertas": {
+            "type": "integer",
+            "description": "Número total de vacantes que no han sido eliminadas.",
+            "example": 8
+          },
+          "top_5_tecnologias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Un resumen de las 5 tecnologías más mencionadas entre los colaboradores activos.",
+            "example": [
+              "Node.js (75 menciones)",
+              "React (68 menciones)",
+              "MongoDB (65 menciones)",
+              "AWS (40 menciones)",
+              "Docker (35 menciones)"
+            ]
+          }
+        }
+      },
+      "ChatPayload": {
+        "type": "object",
+        "description": "Mensaje enviado al chatbot de la IA.",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "La pregunta o consulta del usuario.",
+            "example": "¿Cuáles son los 3 colaboradores con más experiencia en React?"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "ChatResponse": {
+        "type": "object",
+        "description": "Respuesta generada por el chatbot de la IA.",
+        "properties": {
+          "answer": {
+            "type": "string",
+            "description": "La respuesta textual de la IA a la consulta.",
+            "example": "Los 3 colaboradores con más experiencia en React son: Ana García, Carlos Sánchez y Elena Silva."
+          }
+        }
+      },
+      "CreateJornadaPayload": {
+        "type": "object",
+        "description": "Datos para crear una nueva jornada.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Media Jornada (Mañana)"
+          },
+          "hours": {
+            "type": "number",
+            "example": 20
+          },
+          "description": {
+            "type": "string",
+            "example": "De 9:00 a 13:00."
+          }
+        },
+        "required": [
+          "name",
+          "hours"
+        ]
+      },
+      "JornadaSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "jornada": {
+            "$ref": "#/components/schemas/JornadaBase"
+          }
+        }
+      },
+      "UpdateJornadaPayload": {
+        "type": "object",
+        "description": "Campos actualizables para una jornada. Todos son opcionales.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "hours": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "DeleteJornadaSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Jornada eliminada correctamente"
+          },
+          "id": {
+            "type": "string",
+            "format": "ObjectId"
+          }
+        }
+      },
+      "UpdateAssignedPersonPayload": {
+        "type": "object",
+        "description": "El ID de la persona a editar (en la URL) y los campos a modificar.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rol": {
+            "type": "string"
+          },
+          "horasAsignadas": {
+            "type": "number"
+          },
+          "tecnologias": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "seniority": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterWithRelationsPayload": {
+        "type": "object",
+        "description": "Payload complejo para registrar un proyecto y actualizar/crear sus relaciones con colaboradores y vacantes en una sola transacción.",
+        "properties": {
+          "project": {
+            "$ref": "#/components/schemas/RegisterProjectPayload"
+          },
+          "collaborators": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "ObjectId",
+                  "description": "ID del colaborador a actualizar."
+                },
+                "projectHours": {
+                  "type": "number",
+                  "description": "Horas a asignar a este nuevo proyecto."
+                },
+                "assignToProject": {
+                  "type": "boolean",
+                  "description": "Si es true, se añade este proyecto a la lista del colaborador."
+                },
+                "rol": {
+                  "type": "string"
+                },
+                "seniority": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "vacancies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "vacancieName": {
+                  "type": "string"
+                },
+                "hours": {
+                  "type": "number"
+                },
+                "seniority": {
+                  "type": "string"
+                },
+                "skills": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "project"
+        ]
+      },
+      "RegisterWithRelationsResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Proyecto registrado y relaciones procesadas"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "SkillBase": {
+        "type": "object",
+        "description": "Representación de una habilidad o tecnología.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "ObjectId",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre único de la habilidad.",
+            "example": "Gestión de Proyectos Ágiles"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción opcional de la habilidad.",
+            "example": "Experiencia en metodologías Scrum y Kanban."
+          },
+          "status": {
+            "type": "boolean",
+            "description": "Indica si la habilidad está activa (true) o inactiva (false).",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "SkillListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SkillBase"
+        }
+      },
+      "CreateSkillPayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Docker"
+          },
+          "description": {
+            "type": "string",
+            "example": "Manejo de contenedores y orquestación básica."
+          },
+          "status": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      },
+      "CreateSkillSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string"
+          },
+          "skill": {
+            "$ref": "#/components/schemas/SkillBase"
+          }
+        }
+      },
+      "UpdateSkillPayload": {
+        "type": "object",
+        "description": "Campos actualizables para una habilidad. Todos son opcionales.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateSkillSuccessResponse": {
+        "$ref": "#/components/schemas/CreateSkillSuccessResponse"
+      },
+      "DeleteSkillSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "success"
+          },
+          "message": {
+            "type": "string",
+            "example": "Habilidad eliminada correctamente."
+          }
+        }
+      }
+    }
+  },
+  "responses": {}
+}

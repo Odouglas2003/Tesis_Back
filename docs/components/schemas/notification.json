@@ -1,0 +1,114 @@
+{
+  "Reader": {
+    "type": "object",
+    "properties": {
+      "email": { "type": "string", "format": "email" },
+      "readAt": { "type": "string", "format": "date-time" }
+    }
+  },
+
+   "NotificationBase": {
+    "type": "object",
+    "description": "Representación base de una notificación en la base de datos.",
+    "properties": {
+      "_id": { "type": "string", "format": "ObjectId", "readOnly": true },
+      "type": { "type": "string", "example": "contract" },
+      "referenceId": { "type": "string", "description": "ID del contrato o proyecto relacionado.", "example": "60d21b4667d0d8992e610c85" },
+      "message": { "type": "string", "example": "El contrato de Ana García vence en 15 días" },
+      "alertLevel": { "type": "string", "enum": ["warning", "expired", "info"], "example": "warning" },
+      "recipients": { "type": "array", "items": { "type": "string", "format": "email" } },
+      "sentAt": { "type": "string", "format": "date-time", "readOnly": true },
+      "readers": { "type": "array", "items": { "$ref": "#/Reader" } }
+    }
+  },
+  
+  "NotificationForUser": {
+      "type": "object",
+      "description": "Formato simplificado de una notificación para un usuario específico (no leída).",
+      "properties": {
+        "_id": { "type": "string", "format": "ObjectId" },
+        "type": { "type": "string" },
+        "referenceId": { "type": "string" },
+        "message": { "type": "string" },
+        "alertLevel": { "type": "string", "enum": ["warning", "expired", "info"] },
+        "sentAt": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean", "example": false }
+      }
+  },
+  "NotificationListForUserResponse": {
+      "type": "object",
+      "properties": {
+          "status": { "type": "string", "example": "success" },
+          "data": { "type": "array", "items": { "$ref": "#/NotificationForUser" } }
+      }
+  },
+
+  "CheckProcessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Contratos verificados y notificaciones generadas" }
+    }
+  },
+
+  "MarkAsReadPayload": {
+    "type": "object",
+    "properties": {
+      "email": { "type": "string", "format": "email" },
+      "referenceId": { "type": "string", "format": "ObjectId" },
+      "type": { "type": "string", "example": "contract" }
+    },
+    "required": ["email", "referenceId", "type"]
+  },
+
+  "MarkAllAsReadPayload": {
+    "type": "object",
+    "properties": {
+      "email": { "type": "string", "format": "email" }
+    },
+    "required": ["email"]
+  },
+
+  "SimpleSuccessMessageResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string" }
+    }
+  },
+
+  "FullNotificationListResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "data": { "type": "array", "items": { "$ref": "#/NotificationBase" } }
+    }
+  },
+  
+  "RecipientNotRead": {
+    "type": "object",
+    "properties": {
+      "email": { "type": "string", "format": "email" },
+      "name": { "type": "string", "nullable": true, "example": "Carlos Sánchez" }
+    }
+  },
+  
+  "NotificationForManager": {
+    "type": "object",
+    "properties": {
+      "_id": { "type": "string", "format": "ObjectId" },
+      "message": { "type": "string" },
+      "sentAt": { "type": "string", "format": "date-time" },
+      "readers": { "type": "array", "items": { "$ref": "#/Reader" } },
+      "recipientsNotRead": { "type": "array", "items": { "$ref": "#/RecipientNotRead" } }
+    }
+  },
+
+  "NotificationListForManagerResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "data": { "type": "array", "items": { "$ref": "#/NotificationForManager" } }
+    }
+  }
+}

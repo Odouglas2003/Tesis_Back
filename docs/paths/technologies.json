@@ -1,0 +1,55 @@
+{
+  "/technologies/": {
+    "get": {
+      "tags": [ "Technologies" ],
+      "summary": "Obtener lista de todas las tecnologías",
+      "description": "Devuelve un array de todas las tecnologías registradas, ordenadas alfabéticamente.",
+      "responses": {
+        "200": { "description": "Lista de tecnologías obtenida.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/technology.json#/TechnologyListResponse" } } } }
+      }
+    },
+    "post": {
+      "tags": [ "Technologies" ],
+      "summary": "Añadir una nueva tecnología",
+      "description": "Crea una nueva tecnología. El nombre debe ser único. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/technology.json#/AddTechnologyPayload" } } } },
+      "responses": {
+        "201": { "description": "Tecnología añadida exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/technology.json#/TechnologySuccessResponse" } } } },
+        "400": { "description": "Falta el nombre de la tecnología." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "409": { "description": "Ya existe una tecnología con ese nombre (Conflicto)." }
+      }
+    }
+  },
+  "/technologies/{id}": {
+    "put": {
+      "tags": [ "Technologies" ],
+      "summary": "Editar una tecnología",
+      "description": "Actualiza el nombre de una tecnología existente. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la tecnología.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/technology.json#/EditTechnologyPayload" } } } },
+      "responses": {
+        "200": { "description": "Tecnología actualizada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/technology.json#/TechnologySuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Tecnología no encontrada." }
+      }
+    },
+    "delete": {
+      "tags": [ "Technologies" ],
+      "summary": "Eliminar una tecnología",
+      "description": "Elimina permanentemente una tecnología. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la tecnología.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Tecnología eliminada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/technology.json#/DeleteTechnologySuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Tecnología no encontrada." }
+      }
+    }
+  }
+}

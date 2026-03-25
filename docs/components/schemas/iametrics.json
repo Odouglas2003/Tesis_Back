@@ -1,0 +1,29 @@
+{
+  "IaMetricsResponse": {
+    "type": "object",
+    "description": "Resumen de métricas clave del sistema, formateadas para ser consumidas por un servicio de IA.",
+    "properties": {
+      "cantidad_colaboradores_activos": { 
+        "type": "integer", 
+        "description": "Número total de colaboradores cuyo estado es activo y no han sido eliminados.",
+        "example": 152 
+      },
+      "total_asignaciones_en_proyectos": { 
+        "type": "integer", 
+        "description": "Suma total de todas las asignaciones de personas a proyectos activos.",
+        "example": 210 
+      },
+      "cantidad_vacantes_abiertas": { 
+        "type": "integer", 
+        "description": "Número total de vacantes que no han sido eliminadas.",
+        "example": 8 
+      },
+      "top_5_tecnologias": { 
+        "type": "array", 
+        "items": { "type": "string" },
+        "description": "Un resumen de las 5 tecnologías más mencionadas entre los colaboradores activos.",
+        "example": ["Node.js (75 menciones)", "React (68 menciones)", "MongoDB (65 menciones)", "AWS (40 menciones)", "Docker (35 menciones)"] 
+      }
+    }
+  }
+}

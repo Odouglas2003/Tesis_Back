@@ -1,0 +1,74 @@
+{
+  "RoleBase": {
+    "type": "object",
+    "description": "Representación de un rol en el sistema.",
+    "properties": {
+      "id": { "type": "string", "format": "ObjectId", "readOnly": true },
+      "name": { 
+        "type": "string", 
+        "description": "Nombre único del rol.",
+        "example": "Administrator" 
+      },
+      "description": { 
+        "type": "string", 
+        "description": "Descripción de los permisos y responsabilidades del rol.",
+        "example": "Tiene acceso a todas las funcionalidades del sistema." 
+      },
+      "status": { 
+        "type": "boolean", 
+        "description": "Indica si el rol está activo (true) o inactivo (false).",
+        "default": true 
+      },
+      "createdAt": { "type": "string", "format": "date-time", "readOnly": true },
+      "updatedAt": { "type": "string", "format": "date-time", "readOnly": true }
+    }
+  },
+
+  "RoleListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/RoleBase"
+    }
+  },
+
+  "CreateRolePayload": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "example": "Content Moderator" },
+      "description": { "type": "string", "example": "Puede editar y eliminar contenido generado por usuarios." },
+      "status": { "type": "boolean", "example": true }
+    },
+    "required": ["name", "description"]
+  },
+
+  "CreateRoleSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string" },
+      "role": { "$ref": "#/RoleBase" }
+    }
+  },
+
+  "UpdateRolePayload": {
+      "type": "object",
+      "description": "Campos actualizables para un rol. Todos son opcionales.",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "boolean" }
+      }
+  },
+
+  "UpdateRoleSuccessResponse": {
+    "$ref": "#/CreateRoleSuccessResponse"
+  },
+  
+  "DeleteRoleSuccessResponse": {
+    "type": "object",
+    "properties": {
+        "status": { "type": "string", "example": "success" },
+        "message": { "type": "string", "example": "Rol eliminado correctamente." }
+    }
+  }
+}

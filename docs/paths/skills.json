@@ -1,0 +1,65 @@
+{
+  "/skills/": {
+    "get": {
+      "tags": [ "Skills" ],
+      "summary": "Obtener todas las habilidades",
+      "description": "Devuelve una lista de habilidades. Puede filtrarse para obtener solo las activas o inactivas.",
+      "parameters": [
+        {
+          "name": "active",
+          "in": "query",
+          "description": "Filtrar por estado. 'true' para activas, 'false' para inactivas. Si se omite, devuelve todas.",
+          "schema": { "type": "boolean" }
+        }
+      ],
+      "responses": {
+        "200": { "description": "Lista de habilidades obtenida.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/skill.json#/SkillListResponse" } } } }
+      }
+    },
+    "post": {
+      "tags": [ "Skills" ],
+      "summary": "Crear una nueva habilidad",
+      "description": "Crea una nueva habilidad. El nombre debe ser único. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/skill.json#/CreateSkillPayload" } } } },
+      "responses": {
+        "201": { "description": "Habilidad creada exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/skill.json#/CreateSkillSuccessResponse" } } } },
+        "400": { "description": "Faltan campos requeridos." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "409": { "description": "Ya existe una habilidad con ese nombre." }
+      }
+    }
+  },
+  "/skills/{id}": {
+    "put": {
+      "tags": [ "Skills" ],
+      "summary": "Actualizar una habilidad",
+      "description": "Actualiza una habilidad existente. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la habilidad.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "../components/schemas/skill.json#/UpdateSkillPayload" } } } },
+      "responses": {
+        "200": { "description": "Habilidad actualizada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/skill.json#/UpdateSkillSuccessResponse" } } } },
+        "400": { "description": "No se proporcionaron datos para actualizar." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Habilidad no encontrada." },
+        "409": { "description": "El nuevo nombre de la habilidad ya existe." }
+      }
+    },
+    "delete": {
+      "tags": [ "Skills" ],
+      "summary": "Eliminar una habilidad",
+      "description": "Elimina permanentemente una habilidad. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [ { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB de la habilidad.", "schema": { "type": "string", "format": "ObjectId" } } ],
+      "responses": {
+        "200": { "description": "Habilidad eliminada.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/skill.json#/DeleteSkillSuccessResponse" } } } },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Habilidad no encontrada." }
+      }
+    }
+  }
+}

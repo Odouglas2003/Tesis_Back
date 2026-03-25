@@ -1,0 +1,47 @@
+{
+  "TechnologyBase": {
+    "type": "object",
+    "description": "Representación de una tecnología.",
+    "properties": {
+      "id": { "type": "string", "format": "ObjectId", "readOnly": true },
+      "name": { "type": "string", "example": "Node.js" }
+    },
+    "required": ["name"]
+  },
+
+  "TechnologyListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/TechnologyBase"
+    }
+  },
+
+  "AddTechnologyPayload": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "example": "TypeScript" }
+    },
+    "required": ["name"]
+  },
+
+  "TechnologySuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string" },
+      "data": { "$ref": "#/TechnologyBase" }
+    }
+  },
+
+  "EditTechnologyPayload": {
+      "$ref": "#/AddTechnologyPayload"
+  },
+  
+  "DeleteTechnologySuccessResponse": {
+    "type": "object",
+    "properties": {
+        "status": { "type": "string", "example": "success" },
+        "message": { "type": "string", "example": "Tecnología eliminada correctamente." }
+    }
+  }
+}

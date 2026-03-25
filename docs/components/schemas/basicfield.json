@@ -1,0 +1,46 @@
+{
+  "BasicFieldDefBase": {
+    "type": "object",
+    "description": "Representa la definición de un campo básico del sistema.",
+    "properties": {
+      "_id": {
+        "type": "string",
+        "format": "ObjectId",
+        "readOnly": true
+      },
+      "companyId": {
+        "type": "number",
+        "default": 1
+      },
+      "key": {
+        "type": "string",
+        "description": "Identificador único del campo (usado en el código).",
+        "example": "idExterno"
+      },
+      "label": {
+        "type": "string",
+        "description": "Etiqueta a mostrar para el campo en la UI.",
+        "example": "ID Externo"
+      },
+      "type": {
+        "type": "string",
+        "enum": [ "string", "number", "date" ],
+        "description": "Tipo de dato del campo."
+      },
+      "order": {
+        "type": "number",
+        "description": "Número para ordenar los campos en la UI.",
+        "default": 0
+      },
+      "createdAt": { "type": "string", "format": "date-time", "readOnly": true },
+      "updatedAt": { "type": "string", "format": "date-time", "readOnly": true }
+    }
+  },
+
+  "BasicFieldDefListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/BasicFieldDefBase"
+    }
+  }  
+}

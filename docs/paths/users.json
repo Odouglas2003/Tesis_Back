@@ -1,0 +1,314 @@
+{
+  "/user/register": {
+    "post": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Registrar una nueva solicitud de usuario",
+      "description": "Crea una nueva solicitud de registro que debe ser aprobada por un administrador. Se envía un email al administrador para la autorización.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/user.json#/RegisterPayload"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Solicitud de registro enviada con éxito.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../components/schemas/user.json#/RegisterSuccessResponse"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Datos de registro incompletos o el email ya existe."
+        }
+      }
+    }
+  },
+  "/user/login": {
+    "post": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Iniciar sesión de usuario",
+      "description": "Autentica a un usuario activo con su email y contraseña, y devuelve el perfil del usuario junto con un token JWT.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/user.json#/LoginPayload"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Autenticación exitosa.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../components/schemas/user.json#/LoginSuccessResponse"
+              }
+            }
+          }
+        },
+        "401": {
+          "description": "Credenciales inválidas, cuenta no activa, pendiente o rechazada."
+        }
+      }
+    }
+  },
+  "/user/prueba": {
+    "get": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Obtener lista de todos los usuarios (Admin)",
+      "description": "Devuelve una lista de todos los usuarios activos en el sistema. Requiere permisos de administrador.",
+      "security": [
+        {
+          "accessTokenAuth": []
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de usuarios obtenida exitosamente.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../components/schemas/user.json#/UserListResponse"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/user/authorize/{token}/{action}": {
+    "get": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Procesar aprobación o rechazo de un usuario",
+      "description": "Endpoint utilizado a través de un enlace de email para que un administrador apruebe o rechace una solicitud de registro pendiente.",
+      "parameters": [
+        {
+          "name": "token",
+          "in": "path",
+          "required": true,
+          "description": "Token de autorización único.",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "action",
+          "in": "path",
+          "required": true,
+          "description": "Acción a realizar.",
+          "schema": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "reject"
+            ]
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Acción procesada exitosamente. Muestra un mensaje HTML de confirmación.",
+          "content": {
+            "text/html": {
+              "schema": {
+                "type": "string",
+                "example": "<h1>¡Acción completada!</h1>"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "El token es inválido, ha expirado o la solicitud ya fue procesada."
+        }
+      }
+    }
+  },
+  "/user/update/{email}": {
+    "put": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Actualizar información de un usuario",
+      "description": "Permite actualizar el nombre, rol o estado de un usuario existente, identificado por su email. Requiere permisos.",
+      "security": [
+        {
+          "accessTokenAuth": []
+        }
+      ],
+      "parameters": [
+        {
+          "name": "email",
+          "in": "path",
+          "required": true,
+          "description": "Email del usuario a actualizar.",
+          "schema": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/user.json#/UpdateUserPayload"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Usuario actualizado exitosamente.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../components/schemas/user.json#/UpdateUserSuccessResponse"
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Usuario no encontrado."
+        }
+      }
+    }
+  },
+  "/user/delete/{email}": {
+    "delete": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Eliminar un usuario permanentemente (Hard Delete)",
+      "description": "Elimina por completo el registro de un usuario de la base de datos, identificado por su email. Esta acción es irreversible. Requiere permisos elevados.",
+      "security": [
+        {
+          "accessTokenAuth": []
+        }
+      ],
+      "parameters": [
+        {
+          "name": "email",
+          "in": "path",
+          "required": true,
+          "description": "Email del usuario a eliminar.",
+          "schema": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Usuario eliminado exitosamente.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "example": "success"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "Usuario eliminado correctamente"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Usuario no encontrado."
+        }
+      }
+    }
+  },
+  "/user/auth/editpws": {
+    "post": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Solicitar reseteo de contraseña",
+      "description": "Inicia el flujo para resetear la contraseña de un usuario. Si el email existe y está activo, se envía un correo con instrucciones. La respuesta siempre es genérica para no revelar si un email está registrado.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/user.json#/RequestPasswordResetPayload"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Solicitud procesada.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../components/schemas/user.json#/SimpleMessageResponse"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/user/auth/resetpassword": {
+    "post": {
+      "tags": [
+        "Users"
+      ],
+      "summary": "Establecer una nueva contraseña",
+      "description": "Permite al usuario establecer una nueva contraseña usando el enlace o la información del correo de recuperación.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../components/schemas/user.json#/ResetPasswordPayload"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Contraseña actualizada con éxito.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../components/schemas/user.json#/SimpleMessageResponse"
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Las contraseñas no coinciden o faltan datos."
+        },
+        "404": {
+          "description": "Usuario no encontrado o no activo."
+        }
+      }
+    }
+  }
+}

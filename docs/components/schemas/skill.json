@@ -1,0 +1,74 @@
+{
+  "SkillBase": {
+    "type": "object",
+    "description": "Representación de una habilidad o tecnología.",
+    "properties": {
+      "id": { "type": "string", "format": "ObjectId", "readOnly": true },
+      "name": { 
+        "type": "string", 
+        "description": "Nombre único de la habilidad.",
+        "example": "Gestión de Proyectos Ágiles" 
+      },
+      "description": { 
+        "type": "string", 
+        "description": "Descripción opcional de la habilidad.",
+        "example": "Experiencia en metodologías Scrum y Kanban." 
+      },
+      "status": { 
+        "type": "boolean", 
+        "description": "Indica si la habilidad está activa (true) o inactiva (false).",
+        "default": true 
+      },
+      "createdAt": { "type": "string", "format": "date-time", "readOnly": true },
+      "updatedAt": { "type": "string", "format": "date-time", "readOnly": true }
+    }
+  },
+
+  "SkillListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/SkillBase"
+    }
+  },
+
+  "CreateSkillPayload": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "example": "Docker" },
+      "description": { "type": "string", "example": "Manejo de contenedores y orquestación básica." },
+      "status": { "type": "boolean", "example": true }
+    },
+    "required": ["name", "description"]
+  },
+
+  "CreateSkillSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string" },
+      "skill": { "$ref": "#/SkillBase" }
+    }
+  },
+
+  "UpdateSkillPayload": {
+      "type": "object",
+      "description": "Campos actualizables para una habilidad. Todos son opcionales.",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "boolean" }
+      }
+  },
+
+  "UpdateSkillSuccessResponse": {
+    "$ref": "#/CreateSkillSuccessResponse"
+  },
+  
+  "DeleteSkillSuccessResponse": {
+    "type": "object",
+    "properties": {
+        "status": { "type": "string", "example": "success" },
+        "message": { "type": "string", "example": "Habilidad eliminada correctamente." }
+    }
+  }
+}

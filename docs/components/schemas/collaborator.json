@@ -1,0 +1,138 @@
+{
+  "ProjectInfo": {
+    "type": "object",
+    "description": "Información de un proyecto asignado a un colaborador.",
+    "properties": {
+      "projectId": {
+        "type": "object",
+        "description": "Datos poblados del proyecto asignado.",
+        "properties": {
+          "id": { "type": "string", "format": "ObjectId" },
+          "name": { "type": "string", "example": "Proyecto Alpha" },
+          "client": { "type": "string", "example": "Cliente Global" }
+        }
+      },
+      "rol": { "type": "string", "example": "Backend Developer" },
+      "horasAsignadas": { "type": "number", "example": 40 },
+      "seniority": { "type": "string", "example": "Senior" },
+      "orderDate": { "type": "string", "format": "date-time" },
+      "startDate": { "type": "string", "format": "date-time" }
+    }
+  },
+  "RolSeniorityInfo": {
+    "type": "object",
+    "properties": {
+      "rol": { "type": "string", "example": "DevOps Engineer" },
+      "seniority": { "type": "string", "example": "Semi-Senior" }
+    },
+    "required": ["rol", "seniority"]
+  },
+
+   "CollaboratorBase": {
+    "type": "object",
+    "description": "Representación completa de un colaborador.",
+    "properties": {
+      "id": { "type": "string", "format": "ObjectId", "readOnly": true },
+      "dni": { "type": "string", "example": "12345678A" },
+      "first_name": { "type": "string", "example": "Ana" },
+      "last_name": { "type": "string", "example": "García" },
+      "email": { "type": "string", "format": "email", "example": "ana.garcia@example.com" },
+      "Proyectos": { "type": "array", "items": { "$ref": "#/ProjectInfo" } },
+      "tecnologias": { "type": "array", "items": { "type": "string" }, "example": ["Node.js", "React", "MongoDB"] },
+      "estado": { "type": "string", "example": "Activo" },
+      "fin_contrato": { "type": "string", "format": "date-time" },
+      "honorarios": { "type": "number", "example": 5000 },
+      "start_contrato": { "type": "string", "format": "date-time" },
+      "horasAsignadas": { "type": "number" },
+      "observacion": { "type": "number" },
+      "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+      "delete_at": { "type": "string", "format": "date-time", "readOnly": true, "nullable": true },
+      "last_edited_by": { "type": "string" },
+      "last_edited_on": { "type": "string", "format": "date-time", "readOnly": true },
+      "roles": { "type": "array", "items": { "$ref": "#/RolSeniorityInfo" } },
+      "image": { "type": "string", "format": "uri", "nullable": true, "description": "URL de la imagen del colaborador." }
+    }
+  },  
+
+  "CollaboratorListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/CollaboratorBase"
+    }
+  },
+
+  "RegisterCollaboratorPayload": {
+    "type": "object",
+    "properties": {
+      "dni": { "type": "string", "example": "12345678A" },
+      "first_name": { "type": "string", "example": "Carlos" },
+      "last_name": { "type": "string", "example": "Sánchez" },
+      "email": { "type": "string", "format": "email", "example": "carlos.sanchez@example.com" },
+      "estado": { "type": "string", "example": "Activo" }
+    },
+    "required": ["dni", "first_name", "last_name", "email", "estado"],
+    "description": "Datos mínimos para registrar un colaborador. Otros campos como fin_contrato, honorarios, etc., son opcionales."
+  },
+
+  "RegisterCollaboratorSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Colaborador registrado correctamente." },
+      "colaborador": { "$ref": "#/CollaboratorBase" }
+    }
+  },
+  
+  "SingleCollaboratorResponse": {
+      "type": "object",
+      "properties": {
+          "status": { "type": "string", "example": "success" },
+          "collaborator": { "$ref": "#/CollaboratorBase" }
+      }
+  },
+
+  "UpdateCollaboratorPayload": {
+    "type": "object",
+    "description": "Campos actualizables para un colaborador. DNI, id y _id no son modificables.",
+    "properties": {
+      "first_name": { "type": "string" },
+      "last_name": { "type": "string" },
+      "email": { "type": "string", "format": "email" },
+      "Proyectos": { "type": "array", "items": { "$ref": "#/ProjectInfo" } },
+      "tecnologias": { "type": "array", "items": { "type": "string" } },
+      "estado": { "type": "string" },
+      "fin_contrato": { "type": "string", "format": "date-time" },
+      "honorarios": { "type": "number" },
+      "start_contrato": { "type": "string", "format": "date-time" },
+      "horasAsignadas": { "type": "number" },
+      "observacion": { "type": "string" },
+      "roles": { "type": "array", "items": { "$ref": "#/RolSeniorityInfo" } }
+    }
+  },
+
+  "UpdateCollaboratorSuccessResponse": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string", "example": "success" },
+      "message": { "type": "string", "example": "Colaborador actualizado correctamente." },
+      "colaborador": { "$ref": "#/CollaboratorBase" }
+    }
+  },
+
+  "DeleteCollaboratorSuccessResponse": {
+    "type": "object",
+    "properties": {
+        "status": { "type": "string", "example": "success" },
+        "message": { "type": "string", "example": "Colaborador marcado como eliminado correctamente." },
+        "id": { "type": "string", "format": "ObjectId" }
+    }
+  },
+
+  "RemoveProjectPayload": {
+      "type": "object",
+      "properties": {
+          "projectId": { "type": "string", "format": "ObjectId", "description": "ID del proyecto a remover de la lista del colaborador." }
+      },
+      "required": ["projectId"]
+  }
+}

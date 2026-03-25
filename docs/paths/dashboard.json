@@ -1,0 +1,19 @@
+{
+  "/dashboard/metrics": {
+    "get": {
+      "tags": [ "Dashboard" ],
+      "summary": "Obtener todas las métricas del dashboard",
+      "description": "Devuelve un objeto completo con todas las métricas calculadas necesarias para renderizar el dashboard principal. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "responses": {
+        "200": { 
+          "description": "Métricas obtenidas exitosamente.", 
+          "content": { "application/json": { "schema": { "$ref": "../components/schemas/dashboard.json#/DashboardMetricsResponse" } } } 
+        },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "500": { "description": "Error interno al calcular las métricas." }
+      }
+    }
+  }
+}

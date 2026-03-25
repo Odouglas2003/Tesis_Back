@@ -1,0 +1,15 @@
+{
+  "/stateprojects/": {
+    "get": {
+      "tags": [ "StateProjects" ],
+      "summary": "Obtener todos los estados de proyecto",
+      "description": "Devuelve una lista de todos los estados definidos que un proyecto puede tener, ordenados por fecha de creación.",
+      "responses": {
+        "200": { 
+          "description": "Lista de estados de proyecto obtenida exitosamente.", 
+          "content": { "application/json": { "schema": { "$ref": "../components/schemas/stateproject.json#/StateProjectListResponse" } } } 
+        }
+      }
+    }
+  }
+}

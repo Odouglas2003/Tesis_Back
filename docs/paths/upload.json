@@ -1,0 +1,46 @@
+{
+  "/upload/image": {
+    "post": {
+      "tags": [ "Upload" ],
+      "summary": "Subir un archivo de imagen",
+      "description": "Sube un archivo a un servicio de almacenamiento en la nube (como S3) y devuelve una clave única para identificarlo. Esta clave NO es una URL pública.",
+      "requestBody": {
+        "required": true,
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "$ref": "../components/schemas/upload.json#/UploadImagePayload"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": { 
+          "description": "Archivo subido exitosamente. Devuelve la clave del archivo.", 
+          "content": { "application/json": { "schema": { "$ref": "../components/schemas/upload.json#/UploadImageSuccessResponse" } } }
+        },
+        "400": { "description": "No se adjuntó ningún archivo en la solicitud." }
+      }
+    }
+  },
+  "/upload/image/{key}": {
+    "get": {
+      "tags": [ "Upload" ],
+      "summary": "Obtener URL temporal de un archivo",
+      "description": "A partir de una clave de archivo obtenida previamente, genera y devuelve una URL firmada y temporal para acceder al archivo de forma segura.",
+      "parameters": [
+        { 
+          "name": "key", 
+          "in": "path", 
+          "required": true, 
+          "description": "La clave única del archivo que fue devuelta por el endpoint de subida.", 
+          "schema": { "type": "string" } 
+        }
+      ],
+      "responses": {
+        "200": { "description": "URL generada exitosamente.", "content": { "application/json": { "schema": { "$ref": "../components/schemas/upload.json#/GetSignedUrlSuccessResponse" } } } },
+        "404": { "description": "La clave proporcionada no corresponde a ningún archivo existente." }
+      }
+    }
+  }
+}

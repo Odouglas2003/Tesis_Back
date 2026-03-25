@@ -1,0 +1,192 @@
+{
+  "/collaborator/": {
+    "get": {
+      "tags": [ "Collaborators" ],
+      "summary": "Obtener lista de colaboradores",
+      "description": "Devuelve una lista de todos los colaboradores activos. Permite filtrar por un término de búsqueda en nombre, apellido, DNI o email.",
+      "parameters": [
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "description": "Término de búsqueda para filtrar colaboradores.",
+          "schema": { "type": "string" }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de colaboradores obtenida exitosamente.",
+          "content": {
+            "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/CollaboratorListResponse" } }
+          }
+        }
+      }
+    },
+    "post": {
+      "tags": [ "Collaborators" ],
+      "summary": "Registrar un nuevo colaborador",
+      "description": "Crea un nuevo registro de colaborador en la base de datos. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/RegisterCollaboratorPayload" } }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "Colaborador registrado exitosamente.",
+          "content": {
+            "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/RegisterCollaboratorSuccessResponse" } }
+          }
+        },
+        "400": { "description": "Datos incompletos, o DNI/email ya existen." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." }
+      }
+    }
+  },
+  "/collaborator/contracts/expirations": {
+    "get": {
+      "tags": [ "Collaborators" ],
+      "summary": "Revisar vencimiento de contratos",
+      "description": "Endpoint para iniciar la lógica de revisión de contratos por vencer. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "responses": {
+        "200": {
+          "description": "Respuesta de marcador de posición.",
+          "content": {
+            "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } }
+          }
+        },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." }
+      }
+    }
+  },
+  "/collaborator/{id}": {
+    "get": {
+      "tags": [ "Collaborators" ],
+      "summary": "Obtener un colaborador por ID",
+      "description": "Devuelve los detalles completos de un colaborador específico. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB del colaborador.", "schema": { "type": "string", "format": "ObjectId" } }
+      ],
+      "responses": {
+        "200": {
+          "description": "Detalles del colaborador.",
+          "content": {
+            "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/SingleCollaboratorResponse" } }
+          }
+        },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Colaborador no encontrado." }
+      }
+    },
+    "put": {
+      "tags": [ "Collaborators" ],
+      "summary": "Actualizar un colaborador",
+      "description": "Modifica los datos de un colaborador existente. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB del colaborador.", "schema": { "type": "string", "format": "ObjectId" } }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/UpdateCollaboratorPayload" } }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Colaborador actualizado.",
+          "content": {
+            "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/UpdateCollaboratorSuccessResponse" } }
+          }
+        },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Colaborador no encontrado." }
+      }
+    },
+    "delete": {
+      "tags": [ "Collaborators" ],
+      "summary": "Eliminar un colaborador (Soft Delete)",
+      "description": "Marca un colaborador como eliminado. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB del colaborador.", "schema": { "type": "string", "format": "ObjectId" } }
+      ],
+      "responses": {
+        "200": {
+          "description": "Colaborador marcado como eliminado.",
+          "content": {
+            "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/DeleteCollaboratorSuccessResponse" } }
+          }
+        },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Colaborador no encontrado." }
+      }
+    }
+  },
+  "/collaborator/{id}/asignar": {
+    "put": {
+      "tags": [ "Collaborators" ],
+      "summary": "Actualizar colaborador (ruta alternativa)",
+      "description": "Ruta alternativa para modificar los datos de un colaborador. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB del colaborador.", "schema": { "type": "string", "format": "ObjectId" } }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/UpdateCollaboratorPayload" } }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Colaborador actualizado.",
+          "content": {
+            "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/CollaboratorBase" } }
+          }
+        },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Colaborador no encontrado." }
+      }
+    }
+  },
+  "/collaborator/{id}/proyectos": {
+    "delete": {
+      "tags": [ "Collaborators" ],
+      "summary": "Remover un proyecto de un colaborador",
+      "description": "Elimina un proyecto de la lista de proyectos asignados. Requiere rol de 'administrador'.",
+      "security": [ { "accessTokenAuth": [] } ],
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "description": "ID de MongoDB del colaborador.", "schema": { "type": "string", "format": "ObjectId" } }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": { "schema": { "$ref": "../components/schemas/collaborator.json#/RemoveProjectPayload" } }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "Respuesta de marcador de posición para la eliminación del proyecto.",
+          "content": {
+            "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } }
+          }
+        },
+        "400": { "description": "Falta el ID del proyecto en el cuerpo de la solicitud." },
+        "401": { "description": "No autorizado." },
+        "403": { "description": "Permisos insuficientes." },
+        "404": { "description": "Colaborador no encontrado." }
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "/basic-fields/": {
+    "get": {
+      "tags": [ "BasicFields" ],
+      "summary": "Obtener todas las definiciones de campos básicos",
+      "description": "Devuelve una lista de todas las definiciones de campos básicos del sistema, ordenadas por el campo 'order'.",
+      "responses": {
+        "200": { 
+          "description": "Lista de definiciones de campos básicos obtenida exitosamente.", 
+          "content": { "application/json": { "schema": { "$ref": "../components/schemas/basicfield.json#/BasicFieldDefListResponse" } } } 
+        }
+      }
+    }
+  }
+}

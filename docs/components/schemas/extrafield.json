@@ -1,0 +1,84 @@
+{
+  "ExtraFieldDefBase": {
+    "type": "object",
+    "description": "Representa la definición de un campo extra personalizable.",
+    "properties": {
+      "_id": {
+        "type": "string",
+        "format": "ObjectId",
+        "readOnly": true
+      },
+      "companyId": {
+        "type": "number",
+        "default": 1
+      },
+      "key": {
+        "type": "string",
+        "description": "Identificador único del campo (usado en el código).",
+        "example": "licenciaConducir"
+      },
+      "label": {
+        "type": "string",
+        "description": "Etiqueta a mostrar para el campo en la UI.",
+        "example": "Licencia de Conducir"
+      },
+      "type": {
+        "type": "string",
+        "enum": [ "string", "number", "boolean", "select", "multiselect", "date" ],
+        "description": "Tipo de dato del campo."
+      },
+      "options": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Lista de opciones para campos de tipo 'select' o 'multiselect'.",
+        "example": ["Clase A", "Clase B", "Clase C"]
+      },
+      "order": {
+        "type": "number",
+        "description": "Número para ordenar los campos en la UI.",
+        "default": 0
+      },
+      "createdAt": { "type": "string", "format": "date-time", "readOnly": true },
+      "updatedAt": { "type": "string", "format": "date-time", "readOnly": true }
+    },
+    "required": ["key", "label", "type"]
+  },
+
+  "ExtraFieldDefListResponse": {
+    "type": "array",
+    "items": {
+      "$ref": "#/ExtraFieldDefBase"
+    }
+  },
+
+  "CreateExtraFieldPayload": {
+    "type": "object",
+    "description": "Datos para crear una nueva definición de campo extra.",
+    "properties": {
+      "key": { "type": "string" },
+      "label": { "type": "string" },
+      "type": { "type": "string", "enum": [ "string", "number", "boolean", "select", "multiselect", "date" ] },
+      "options": { "type": "array", "items": { "type": "string" } },
+      "order": { "type": "number" }
+    },
+    "required": ["key", "label", "type"]
+  },
+
+  "UpdateExtraFieldPayload": {
+    "$ref": "#/CreateExtraFieldPayload"
+  },
+
+  "DeleteSuccessResponse": {
+    "type": "object",
+    "properties": {
+        "message": { "type": "string", "example": "Eliminado" }
+    }
+  },
+  
+  "ConflictResponse": {
+      "type": "object",
+      "properties": {
+          "message": { "type": "string", "example": "Campo en uso, no se puede borrar" }
+      }
+  }
+}
