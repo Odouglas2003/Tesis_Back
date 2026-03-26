@@ -13,12 +13,13 @@ const AppError = require('../utils/AppError'); // <-- NUEVA IMPORTACIÓN
 // dotenv.config() ya está en app.js, no se necesita aquí.
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    type: "OAuth2",
+    user: process.env.MAIL_USERNAME,
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
   },
 });
 
@@ -33,8 +34,12 @@ class UserService {
   }
 
   async _sendAdminAuthorizationEmail(userData, authToken) {
+    if (!process.env.ADMIN_EMAIL) {
+      throw new Error("ADMIN_EMAIL no está configurado en variables de entorno");
+    }
+
     const mailOptions = {
-      from: `Plataforma Rubik <${process.env.EMAIL_USER}>`,
+      from: `Plataforma Rubik <${process.env.MAIL_USERNAME}>`,
       to: process.env.ADMIN_EMAIL,
       subject: "Nueva solicitud de registro de usuario",
       html: `
@@ -47,8 +52,8 @@ class UserService {
             </ul>
             <p>Por favor, autoriza o rechaza la solicitud:</p>
             <div>
-                <a href="${this.baseUrl}/authorize/${authToken}/approve" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Aprobar</a>
-                <a href="${this.baseUrl}/authorize/${authToken}/reject" style="display: inline-block; background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Rechazar</a>
+                <a href="${this.baseUrl}/user/authorize/${authToken}/approve" style="display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Aprobar</a>
+                <a href="${this.baseUrl}/user/authorize/${authToken}/reject" style="display: inline-block; background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Rechazar</a>
             </div>
         `,
     };
@@ -88,7 +93,7 @@ class UserService {
     }
 
     const savedUser = await userToSave.save();
-    const {...userToReturn } = savedUser.toObject();
+    const { ...userToReturn } = savedUser.toObject();
     return userToReturn;
   }
 
@@ -120,7 +125,7 @@ class UserService {
 
     try {
       await transporter.sendMail({
-        from: `Plataforma Rubik <${process.env.EMAIL_USER}>`,
+        from: `Plataforma Rubik <${process.env.MAIL_USERNAME}>`,
         to: user.email,
         subject: emailSubject,
         html: emailHtml,
@@ -156,16 +161,16 @@ class UserService {
     }
 
     const token = jwtService.createToken(user);
-    const {  ...userWithoutSensitiveData } = user.toObject();
+    const { ...userWithoutSensitiveData } = user.toObject();
 
     return { user: userWithoutSensitiveData, token };
   }
 
   async updateUserByEmail(email, updateData) {
     const allowedUpdates = {};
-   
 
-    
+
+
     if (Object.prototype.hasOwnProperty.call(updateData, 'rol')) allowedUpdates.rol = updateData.rol;
     if (Object.prototype.hasOwnProperty.call(updateData, 'status')) allowedUpdates.status = updateData.status;
     if (Object.prototype.hasOwnProperty.call(updateData, 'name')) allowedUpdates.name = updateData.name;
@@ -205,7 +210,7 @@ class UserService {
 
     try {
       await transporter.sendMail({
-        from: `Plataforma Rubik <${process.env.EMAIL_USER}>`,
+        from: `Plataforma Rubik <${process.env.MAIL_USERNAME}>`,
         to: user.email,
         subject: "Restablecer tu contraseña",
         html: `<p>Hola ${user.name},</p><p>Recibimos una solicitud para restablecer la contraseña de tu cuenta.</p><p>Haz clic en el siguiente botón para cambiar tu contraseña:</p><a href="${resetLink}" style="display: inline-block; background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Cambiar Contraseña</a><p>Si no solicitaste un cambio de contraseña, puedes ignorar este correo.</p>`,
