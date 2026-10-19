@@ -53,6 +53,12 @@ const messages = {
         TECH_NOT_FOUND: { statusCode: 404, message: "La tecnología no fue encontrada." },
         TECH_ID_ALREADY_EXISTS: { statusCode: 409, message: "Ya existe una tecnología con el mismo ID." },
 
+        // --- Errores de Habilidades ---
+        SKILL_MISSING_FIELDS: { statusCode: 400, message: "El nombre de la habilidad es requerido." },
+        SKILL_NAME_ALREADY_EXISTS: { statusCode: 409, message: "Ya existe una habilidad con ese nombre." },
+        SKILL_NOT_FOUND: { statusCode: 404, message: "La habilidad no fue encontrada." },
+        SKILL_NO_UPDATE_DATA: { statusCode: 400, message: "Debes proporcionar al menos un campo para actualizar la habilidad." },
+
         // --- Errores de Roles ---
         ROLE_MISSING_FIELDS: { statusCode: 400, message: "El nombre y la descripción del rol son requeridos." },
         ROLE_NAME_ALREADY_EXISTS: { statusCode: 409, message: "Ya existe un rol con el mismo nombre." },
@@ -101,6 +107,11 @@ const messages = {
         TECH_ADDED: "Tecnología agregada correctamente.",
         TECH_UPDATED: "Tecnología actualizada correctamente.",
         TECH_DELETED: "Tecnología eliminada correctamente.",
+
+        // --- Mensajes de Éxito de Habilidades ---
+        SKILL_CREATED: "Habilidad creada correctamente.",
+        SKILL_UPDATED: "Habilidad actualizada correctamente.",
+        SKILL_DELETED: "Habilidad eliminada correctamente.",
 
         // --- Mensajes de Éxito de Roles ---
         ROLE_CREATED: "Rol creado correctamente.",

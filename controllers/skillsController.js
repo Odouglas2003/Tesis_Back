@@ -4,10 +4,14 @@ const messages = require('../utils/messages');
 
 const createSkill = async (req, res) => {
     const { name, description, status } = req.body;
-    if (!name || !description) {
+    if (!name || !name.trim()) {
         throw new AppError('SKILL_MISSING_FIELDS');
     }
-    const newSkill = await SkillsService.createSkill({ name, description, status });
+    const newSkill = await SkillsService.createSkill({
+        name: name.trim(),
+        description: typeof description === 'string' ? description.trim() : '',
+        status: typeof status === 'boolean' ? status : true
+    });
     return res.status(201).json({
         status: "success",
         message: messages.success.SKILL_CREATED,
@@ -22,7 +26,15 @@ const getAllSkill = async (req, res) => {
     else if (active === 'false') activeBool = false;
 
     const skills = await SkillsService.getSkills({ active: activeBool });
-    return res.status(200).json(skills);
+    const normalizedSkills = skills.map((skill) => {
+        const item = skill.toJSON();
+        return {
+            ...item,
+            // Compatibilidad con registros creados antes de incorporar el ABM.
+            status: typeof item.status === 'boolean' ? item.status : true
+        };
+    });
+    return res.status(200).json(normalizedSkills);
 };
 const updateSkill = async (req, res) => {
     const { id } = req.params;

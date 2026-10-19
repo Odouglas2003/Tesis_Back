@@ -22,7 +22,7 @@ const connection = async () => {
    
   } catch (error) {
     error.message = `[MONGO CONNECTION ERROR]: ${error.message}`;
-    
+    throw error;
   }
 };
 

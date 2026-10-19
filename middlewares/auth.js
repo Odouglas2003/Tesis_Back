@@ -36,7 +36,7 @@ const ensureAuth = async (req, res, next) => {
         const user = await User.findById(payload.sub).select('-password');
 
         if (!user || user.status !== 'active') {
-            return res.status(404).send({ status: "error", message: "El usuario identificado no existe o está inactivo." });
+            return res.status(401).send({ status: "error", message: "El usuario identificado no existe o está inactivo." });
         }
 
         // 6. Si todo es correcto, añadir los datos del usuario a la request

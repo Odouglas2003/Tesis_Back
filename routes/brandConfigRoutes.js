@@ -12,8 +12,9 @@ router.post('/', [auth.ensureAuth, auth.hasRole(['administrador']), upload.field
     { name: 'favicon', maxCount: 1 }
 ])], controller.createBrandConfig);
 
-// Consulta todas
-router.get('/',[auth.ensureAuth, auth.hasRole(['administrador'])], controller.getAllBrandConfigs);
+// La identidad visual se necesita también en login, antes de autenticar al usuario.
+// Solo la lectura general es pública; las operaciones de administración siguen protegidas.
+router.get('/', controller.getAllBrandConfigs);
 
 // Buscar por empresaId (todas las configs de una empresa)
 router.get('/empresa/:empresaId', [auth.ensureAuth, auth.hasRole(['administrador'])], controller.getBrandConfigsByEmpresa);

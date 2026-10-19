@@ -19,8 +19,22 @@ class SkillsService {
     }
 
     async getSkills({ active } = {}) {
-        const filter = (typeof active === 'boolean') ? { status: active } : {};
-        return Skill.find(filter).select('-__v');
+        let filter = {};
+
+        if (active === true) {
+            // Las tecnologías creadas por el endpoint legado no tenían el
+            // campo status. Se consideran activas para no ocultarlas del ABM.
+            filter = {
+                $or: [
+                    { status: true },
+                    { status: { $exists: false } }
+                ]
+            };
+        } else if (active === false) {
+            filter = { status: false };
+        }
+
+        return Skill.find(filter).select('-__v').sort({ name: 1 });
     }
 
     async getAllSkill() {

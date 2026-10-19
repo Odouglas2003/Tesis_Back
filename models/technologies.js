@@ -8,6 +8,15 @@ const techSchema = new Schema({
     type: String,
     required: true,
     unique: true // Es una buena práctica asegurar que no haya tecnologías con nombres duplicados.
+  },
+  description: {
+    type: String,
+    trim: true,
+    default: ""
+  },
+  status: {
+    type: Boolean,
+    default: true
   }
 }, {
   // Opciones del Schema para transformar la salida
