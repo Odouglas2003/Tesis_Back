@@ -27,6 +27,21 @@ const getOwnerKey = (req) => {
 router.post('/recommend-team',[auth.ensureAuth, auth.hasRole(['administrador','manager'])], iaController.recommendTeam);
 
 
+// Estado del motor de IA. Siempre responde 200 para que el frontend pueda
+// consultar repetidamente mientras el servicio gratuito de Render se despierta.
+router.get('/status', [auth.ensureAuth], async (req, res) => {
+  const AI_ENGINE_BASE_URL = process.env.AI_ENGINE_BASE_URL;
+  if (!AI_ENGINE_BASE_URL) {
+    return res.status(200).json({ ready: false, reason: 'not_configured' });
+  }
+  try {
+    await axios.get(`${AI_ENGINE_BASE_URL}/`, { timeout: 8000 });
+    return res.status(200).json({ ready: true });
+  } catch (error) {
+    return res.status(200).json({ ready: false, upstreamStatus: error.response?.status || null });
+  }
+});
+
 router.post('/chat', [auth.ensureAuth], async (req, res) => {
   
   const { message, history = [] } = req.body;
