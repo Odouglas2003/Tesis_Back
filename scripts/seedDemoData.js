@@ -226,7 +226,7 @@ async function seedUsers() {
   const users = [
     {
       name: "Administrador",
-      email: "admin@rubik.local",
+      email: "admin@tesis.local",
       password: adminHash,
       rol: "administrador",
       status: "active",
@@ -628,7 +628,7 @@ async function seedDomainData(jornadaDocs, technologyDocs, userDocs) {
       referenceId: projectDocs["Portal de Tramites Digitales"]._id.toString(),
       message: 'El proyecto "Portal de Tramites Digitales" vence en 18 dias',
       alertLevel: "warning",
-      recipients: ["admin@rubik.local", "luis.gomez@rubik.local"],
+      recipients: ["admin@tesis.local", "luis.gomez@rubik.local"],
       readers: [],
     },
     {
@@ -636,7 +636,7 @@ async function seedDomainData(jornadaDocs, technologyDocs, userDocs) {
       referenceId: collaboratorDocs["martin.quiroga@rubik.local"]._id.toString(),
       message: "El contrato de Martin Quiroga vence en 18 dias",
       alertLevel: "warning",
-      recipients: ["admin@rubik.local", "luis.gomez@rubik.local"],
+      recipients: ["admin@tesis.local", "luis.gomez@rubik.local"],
       readers: [{ email: "luis.gomez@rubik.local", readAt: new Date() }],
     },
     {
@@ -644,7 +644,7 @@ async function seedDomainData(jornadaDocs, technologyDocs, userDocs) {
       referenceId: projectDocs["Plataforma Ecommerce Andina"]._id.toString(),
       message: "Demo lista con colaboradores, proyectos, vacantes y catalogos cargados",
       alertLevel: "info",
-      recipients: ["admin@rubik.local", "ana.perez@rubik.local"],
+      recipients: ["admin@tesis.local", "ana.perez@rubik.local"],
       readers: [],
     },
   ];
@@ -700,7 +700,7 @@ async function main() {
       JSON.stringify(
         {
           admin: {
-            email: "admin@rubik.local",
+            email: "admin@tesis.local",
             password: "RubikAdmin2026!",
           },
           managers: [
