@@ -85,7 +85,13 @@ router.post('/chat', [auth.ensureAuth], async (req, res) => {
     
     if (error.response) {
       logger.error(`Error del Motor de IA: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
-      return res.status(error.response.status).json(error.response.data);
+      // No reenviar 401/403 del motor: el frontend los interpreta como sesión vencida y cierra la sesión.
+      const upstreamStatus = error.response.status;
+      const status = upstreamStatus === 401 || upstreamStatus === 403 ? 502 : upstreamStatus;
+      return res.status(status).json({
+        error: "El motor de IA respondió con un error.",
+        upstreamStatus,
+      });
     } else {
       logger.error(`Error de red al conectar con la IA: ${error.message}`);
       return res.status(503).json({ error: "No se pudo conectar con el servicio de IA." });
