@@ -21,9 +21,17 @@ const swaggerFinalDocument = require('./docs/swagger.json');
 const developmentOrigins = ['http://localhost:3000'];
 
 
-const productionOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',') 
-  : [];
+const productionOrigins = [
+  process.env.ALLOWED_ORIGINS,
+  process.env.FRONTEND_BASE_URL,
+]
+  .filter(Boolean)
+  .flatMap((value) => value.split(','))
+  .map((value) => value.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
+const isRubikVercelOrigin = (origin) =>
+  /^https:\/\/tesis-front(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(origin || '');
 
 
 let allowedOrigins;
@@ -41,7 +49,8 @@ if (process.env.NODE_ENV !== 'production') {
 const corsOptions = {
   origin: (origin, callback) => {
    
-    if (allowedOrigins.includes(origin) || !origin) {
+    const normalizedOrigin = origin?.replace(/\/$/, '');
+    if (allowedOrigins.includes(normalizedOrigin) || isRubikVercelOrigin(normalizedOrigin) || !origin) {
       callback(null, true);
     } else {
       const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
