@@ -38,7 +38,13 @@ router.get('/status', [auth.ensureAuth], async (req, res) => {
     await axios.get(`${AI_ENGINE_BASE_URL}/`, { timeout: 8000 });
     return res.status(200).json({ ready: true });
   } catch (error) {
-    return res.status(200).json({ ready: false, upstreamStatus: error.response?.status || null });
+    // Render solo despierta el servicio gratuito con visitas desde un navegador:
+    // devolvemos la URL publica del motor para que el frontend la visite.
+    return res.status(200).json({
+      ready: false,
+      upstreamStatus: error.response?.status || null,
+      wakeUrl: `${AI_ENGINE_BASE_URL.replace(/\/+$/, '')}/`,
+    });
   }
 });
 
