@@ -49,6 +49,7 @@ const getCollaboratorById = async (req, res) => {
 const editColab = async (req, res) => {
   const { id } = req.params;
   const updates = req.body;
+  updates.last_edited_by = (req.user && (req.user.name || req.user.email)) || updates.last_edited_by;
   const updatedCollaborator = await CollaboratorService.updateCollaborator(id, updates);
   return res.status(200).json({
     status: "success",

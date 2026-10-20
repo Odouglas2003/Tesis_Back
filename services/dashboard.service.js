@@ -94,7 +94,7 @@ const obtenerEstadoDeProyectos = async () => {
         { $group: { 
             _id: { 
                 $cond: {
-                    if: { $ne: ["$delete_at", null] },
+                    if: { $ne: [{ $ifNull: ["$delete_at", null] }, null] },
                     then: "Finalizado",
                     else: "$status"
                 }
@@ -139,7 +139,8 @@ const obtenerEstadoDeAsignacion = async () => {
             $addFields: {
                 totalHorasAsignadas: { $sum: "$Proyectos.horasAsignadas" },
                 
-                horasPorModalidad: { $ifNull: ["$infoJornada.hours", 0] }
+                // Las horas asignadas a proyectos son semanales: capacidad = jornada diaria x 5 dias
+                horasPorModalidad: { $multiply: [{ $ifNull: ["$infoJornada.hours", 0] }, 5] }
             }
         },
         
@@ -239,7 +240,8 @@ const obtenerListaColaboradoresPorEstado = async (estado) => {
             $addFields: {
                 totalHorasAsignadas: { $sum: "$Proyectos.horasAsignadas" },
                 // Tomamos las horas del documento de la jornada unida
-                horasPorModalidad: { $ifNull: ["$infoJornada.hours", 0] }
+                // Las horas asignadas a proyectos son semanales: capacidad = jornada diaria x 5 dias
+                horasPorModalidad: { $multiply: [{ $ifNull: ["$infoJornada.hours", 0] }, 5] }
             }
         },
 

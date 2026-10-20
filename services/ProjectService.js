@@ -636,7 +636,7 @@ class ProjectService {
       throw new AppError("Faltan datos obligatorios del proyecto (name, client)", 400);
     }
 
-    const proj = await Project.create(project);
+    const proj = await Project.create({ delete_at: null, ...project });
     const collaboratorResults = [];
     for (const c of collaborators) {
       const filter = c.id ? { _id: c.id } : (c.dni ? { dni: c.dni } : null);

@@ -57,6 +57,7 @@ const editVacan = async (req, res) => {
   const updates = req.body;
   delete updates.id;
   delete updates._id;
+  updates.last_edited_by = (req.user && (req.user.name || req.user.email)) || updates.last_edited_by;
 
   const updatedVacancie = await VacancieService.updateVacancy(id, updates);
   return res.status(200).json({

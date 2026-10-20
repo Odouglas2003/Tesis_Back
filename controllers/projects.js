@@ -53,6 +53,10 @@ const register = async (req, res) => {
 
 const registerWithRelations = async (req, res) => {
   const { body: payload } = req;
+  if (payload && payload.project) {
+    payload.project.last_edited_by = (req.user && (req.user.name || req.user.email)) || payload.project.last_edited_by;
+    if (payload.ia_generated === true) payload.project.ia_generated = true;
+  }
   const result = await ProjectService.registerWithRelations(payload);
   return res.status(201).json({
     status: "success",
@@ -73,6 +77,7 @@ const getProjectByID = async (req, res) => {
 const editProject = async (req, res) => {
   const { id } = req.params;
   const updates = req.body;
+  updates.last_edited_by = (req.user && (req.user.name || req.user.email)) || updates.last_edited_by;
 
   // --- CORRECCIÓN SIMILAR PARA LA EDICIÓN (BUENA PRÁCTICA) ---
   // También normalizamos la categoría si se está intentando editar.
