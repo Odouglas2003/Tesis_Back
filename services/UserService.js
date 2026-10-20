@@ -21,6 +21,10 @@ const transporter = nodemailer.createTransport({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
   },
+  // Render (plan gratuito) bloquea SMTP: sin estos límites el envío queda colgado minutos.
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 });
 
 class UserService {
@@ -81,18 +85,17 @@ class UserService {
       temporalToken: authToken,
     });
 
-    try {
-      await this._sendAdminAuthorizationEmail(userData, authToken);
-    } catch (emailError) {
-      logger.error("Error al enviar email de autorización al admin durante el registro:", {
+    // El usuario queda guardado como "pending" y un administrador lo habilita desde
+    // Configuración > Credenciales. El mail al admin es un aviso opcional: se envía en
+    // segundo plano y, si falla (por ejemplo SMTP bloqueado), no impide el registro.
+    const savedUser = await userToSave.save();
+
+    this._sendAdminAuthorizationEmail(userData, authToken).catch((emailError) => {
+      logger.error("No se pudo enviar el aviso de registro al admin (el usuario quedó pendiente):", {
         message: emailError.message,
-        stack: emailError.stack,
         userEmail: userData.email
       });
-      throw new AppError('EMAIL_SEND_FAIL_ADMIN');
-    }
-
-    const savedUser = await userToSave.save();
+    });
     const { ...userToReturn } = savedUser.toObject();
     return userToReturn;
   }
@@ -172,7 +175,10 @@ class UserService {
 
 
     if (Object.prototype.hasOwnProperty.call(updateData, 'rol')) allowedUpdates.rol = updateData.rol;
-    if (Object.prototype.hasOwnProperty.call(updateData, 'status')) allowedUpdates.status = updateData.status;
+    if (Object.prototype.hasOwnProperty.call(updateData, 'status')) {
+      // El panel usaba 'denied'; en la base el estado se llama 'rejected'.
+      allowedUpdates.status = updateData.status === 'denied' ? 'rejected' : updateData.status;
+    }
     if (Object.prototype.hasOwnProperty.call(updateData, 'name')) allowedUpdates.name = updateData.name;
 
     delete allowedUpdates.email;
