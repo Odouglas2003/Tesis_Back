@@ -2,6 +2,7 @@
 const CollaboratorService = require("../services/CollaboratorService");
 const AppError = require('../utils/AppError');
 const messages = require('../utils/messages');
+const { canEditCollaborator, forbidden } = require('../utils/managerScope');
 function normalizeEstadoAsignacion(v) {
   if (!v) return null;
   const s = String(v)
@@ -49,6 +50,9 @@ const getCollaboratorById = async (req, res) => {
 const editColab = async (req, res) => {
   const { id } = req.params;
   const updates = req.body;
+  if (!(await canEditCollaborator(req.user, id))) {
+    return forbidden(res, 'Solo podés modificar colaboradores de tus proyectos.');
+  }
   updates.last_edited_by = (req.user && (req.user.name || req.user.email)) || updates.last_edited_by;
   const updatedCollaborator = await CollaboratorService.updateCollaborator(id, updates);
   return res.status(200).json({
@@ -85,6 +89,9 @@ const removeProyecto = async (req, res) => {
 
 const updateCollaborator = async (req, res) => {
   const { id } = req.params; 
+  if (!(await canEditCollaborator(req.user, id))) {
+    return forbidden(res, 'Solo podés modificar colaboradores de tus proyectos.');
+  }
   const updates = req.body;  
   const updatedColab = await CollaboratorService.updateCollaboratorServices(id, updates);
   res.status(200).json(updatedColab);

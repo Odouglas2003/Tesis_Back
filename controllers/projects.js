@@ -6,6 +6,7 @@
 const ProjectService = require("../services/ProjectService");
 //const AppError = require('../utils/AppError');
 const messages = require('../utils/messages');
+const { canEditProject, forbidden } = require('../utils/managerScope');
 
 const pruebaProjec = async (req, res) => {
   const searchQuery = req.query.search;
@@ -77,6 +78,9 @@ const getProjectByID = async (req, res) => {
 const editProject = async (req, res) => {
   const { id } = req.params;
   const updates = req.body;
+  if (!(await canEditProject(req.user, id))) {
+    return forbidden(res, 'Solo podés modificar proyectos donde sos Project Manager.');
+  }
   updates.last_edited_by = (req.user && (req.user.name || req.user.email)) || updates.last_edited_by;
 
   // --- CORRECCIÓN SIMILAR PARA LA EDICIÓN (BUENA PRÁCTICA) ---
@@ -117,6 +121,9 @@ const eliminar = async (req, res) => {
 
 const addAssignedPerson = async (req, res) => {
   const { id } = req.params;
+  if (!(await canEditProject(req.user, id))) {
+    return forbidden(res, 'Solo podés modificar proyectos donde sos Project Manager.');
+  }
   const person = req.body;
   const project = await ProjectService.addAssignedPerson(id, person);
   return res.status(200).json({ 
@@ -128,6 +135,9 @@ const addAssignedPerson = async (req, res) => {
 
 const removeAssignedPerson = async (req, res) => {
   const { id } = req.params;
+  if (!(await canEditProject(req.user, id))) {
+    return forbidden(res, 'Solo podés modificar proyectos donde sos Project Manager.');
+  }
   const { id: personId } = req.body;
   const project = await ProjectService.removeAssignedPerson(id, personId);
   return res.status(200).json({ 
@@ -139,6 +149,9 @@ const removeAssignedPerson = async (req, res) => {
 
 const updateAssignedPerson = async (req, res) => {
   const { id } = req.params;
+  if (!(await canEditProject(req.user, id))) {
+    return forbidden(res, 'Solo podés modificar proyectos donde sos Project Manager.');
+  }
   const { id: personId, ...fieldsToUpdate } = req.body;// El ID de la persona y los campos a actualizar
   const project = await ProjectService.updateAssignedPerson(id, personId, fieldsToUpdate);
   return res.status(200).json({ 

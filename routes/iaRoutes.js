@@ -13,6 +13,9 @@ const Project = require('../models/projects');
 const Notification = require('../models/notification');
 const JarvisConversation = require('../models/jarvisConversation');
 const JarvisActionLog = require('../models/jarvisActionLog');
+const Jornada = require('../models/jornada');
+const CollaboratorService = require('../services/CollaboratorService');
+const { canEditProject } = require('../utils/managerScope');
 
 
 require("dotenv").config();
@@ -82,7 +85,9 @@ router.post('/chat', [auth.ensureAuth], async (req, res) => {
 
     const aiResponse = await axios.post(`${AI_ENGINE_BASE_URL}/chat/`, {
       query: message,
-      chat_history: chatHistory
+      chat_history: chatHistory,
+      user_role: req.user?.rol || '',
+      user_name: req.user?.name || ''
     });
 
     const respuestaDeIA = aiResponse.data; 
@@ -166,7 +171,8 @@ router.post('/actions/execute', [auth.ensureAuth, auth.hasRole(['administrador',
     const action = req.body?.action;
     const allowedActions = [
       'create_vacancy', 'create_project', 'assign_collaborator',
-      'remove_assignment', 'close_vacancy', 'update_project', 'create_notification'
+      'remove_assignment', 'close_vacancy', 'update_project', 'create_notification',
+      'create_collaborator'
     ];
     if (!action || !allowedActions.includes(action.type)) {
       return res.status(400).json({ error: 'Acción no permitida.' });
@@ -187,6 +193,46 @@ router.post('/actions/execute', [auth.ensureAuth, auth.hasRole(['administrador',
 
     const source = action.payload || {};
     const editedBy = req.user?.email || req.user?.name || 'JARVIS';
+
+    // Un manager solo puede operar sobre proyectos donde es Project Manager.
+    if (['update_project', 'assign_collaborator', 'remove_assignment'].includes(action.type)) {
+      if (!(await canEditProject(req.user, String(source.projectId || '').trim()))) {
+        return res.status(403).json({ error: 'Solo podés modificar proyectos donde sos Project Manager.' });
+      }
+    }
+
+    if (action.type === 'create_collaborator') {
+      if (!req.user || req.user.rol !== 'administrador') {
+        return res.status(403).json({ error: 'Solo un administrador puede dar de alta colaboradores.' });
+      }
+      const jornadaName = String(source.jornada || 'Full Time').trim();
+      const escaped = jornadaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const jornada = await Jornada.findOne({ name: new RegExp(`^${escaped}$`, 'i') });
+      const collaborator = {
+        first_name: String(source.first_name || '').trim(),
+        last_name: String(source.last_name || '').trim(),
+        email: String(source.email || '').trim().toLowerCase(),
+        dni: String(source.dni || '').trim(),
+        estado: 'Activo',
+        roles: [{ rol: String(source.rol || '').trim(), seniority: String(source.seniority || '').trim() }],
+        tecnologias: Array.isArray(source.tecnologias) ? source.tecnologias.map((t) => String(t).trim()).filter(Boolean) : [],
+        jornadaId: jornada ? jornada._id : undefined,
+        start_contrato: source.start_contrato || new Date(),
+        fin_contrato: source.fin_contrato || undefined,
+        horasAsignadas: 0,
+        Proyectos: [],
+        last_edited_by: editedBy,
+        last_edited_on: new Date()
+      };
+      const missing = ['first_name', 'last_name', 'email', 'dni'].filter((f) => !collaborator[f]);
+      if (!collaborator.roles[0].rol || !collaborator.roles[0].seniority) missing.push('rol y seniority');
+      if (!collaborator.jornadaId) missing.push('jornada válida');
+      if (missing.length) {
+        return res.status(400).json({ error: `Faltan datos para el alta: ${missing.join(', ')}.` });
+      }
+      const created = await CollaboratorService.registerCollaborator(collaborator);
+      return res.status(201).json({ status: 'success', message: `${collaborator.first_name} ${collaborator.last_name} fue dado de alta correctamente.`, data: created });
+    }
 
     if (action.type === 'close_vacancy') {
       const vacancyId = String(source.vacancyId || '').trim();
@@ -270,8 +316,11 @@ router.post('/actions/execute', [auth.ensureAuth, auth.hasRole(['administrador',
         return res.status(409).json({ error: 'El colaborador ya está asignado a este proyecto.' });
       }
       const assignedHours = (collaborator.Proyectos || []).reduce((total, item) => total + Number(item.horasAsignadas || 0), 0);
-      if (assignedHours + person.horasAsignadas > 40) {
-        return res.status(409).json({ error: `La asignación supera las 40 horas semanales (disponibles: ${Math.max(0, 40 - assignedHours)}).` });
+      // Capacidad semanal según la jornada del colaborador (horas diarias x 5).
+      const jornadaColab = collaborator.jornadaId ? await Jornada.findById(collaborator.jornadaId) : null;
+      const capacity = (Number(jornadaColab && jornadaColab.hours) || 8) * 5;
+      if (assignedHours + person.horasAsignadas > capacity) {
+        return res.status(409).json({ error: `La asignación supera las ${capacity} horas semanales de su jornada (disponibles: ${Math.max(0, capacity - assignedHours)}).` });
       }
       const updated = await ProjectService.addAssignedPerson(projectId, person);
       return res.status(200).json({ status: 'success', message: `${person.name} fue asignado al proyecto correctamente.`, data: updated });
@@ -310,17 +359,20 @@ router.post('/actions/execute', [auth.ensureAuth, auth.hasRole(['administrador',
 
 router.post(
   '/analytics/query',
+  [auth.ensureAuth, auth.hasRole(['administrador','manager'])],
   iaController.analyticsQuery
 );
 
 
 router.post(
   '/faiss/update',
+  [auth.ensureAuth, auth.hasRole(['administrador'])],
   iaController.triggerFaissUpdate
 );
 
 router.post(
   '/analytics/export',
+  [auth.ensureAuth, auth.hasRole(['administrador','manager'])],
   iaController.exportAnalyticsReport
 );
 

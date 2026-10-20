@@ -13,7 +13,7 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 
 // GET para obtener datos
-router.get('/prueba', userController.pruebauser);
+router.get('/prueba', [auth.ensureAuth], userController.pruebauser);
 router.get('/authorize/:token/:action', userController.handleAuthorization);
 
 // PUT para actualizar

@@ -96,7 +96,8 @@ class UserService {
         userEmail: userData.email
       });
     });
-    const { ...userToReturn } = savedUser.toObject();
+    // eslint-disable-next-line no-unused-vars
+    const { password: _password, temporalToken: _token, ...userToReturn } = savedUser.toObject();
     return userToReturn;
   }
 
@@ -164,7 +165,8 @@ class UserService {
     }
 
     const token = jwtService.createToken(user);
-    const { ...userWithoutSensitiveData } = user.toObject();
+    // eslint-disable-next-line no-unused-vars
+    const { password: _password, temporalToken: _token, ...userWithoutSensitiveData } = user.toObject();
 
     return { user: userWithoutSensitiveData, token };
   }
